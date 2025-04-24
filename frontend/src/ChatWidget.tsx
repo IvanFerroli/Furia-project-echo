@@ -8,11 +8,37 @@ const ChatWidget = () => {
   ]);
   const [input, setInput] = useState('');
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!input.trim()) return;
-    setMessages([...messages, { from: 'user', text: input }]);
+  
+    const userMessage = { from: 'user', text: input };
+    setMessages((prev) => [...prev, userMessage]);
     setInput('');
+  
+    const botReply = await fetchBotResponse(input);
+    setMessages((prev) => [...prev, { from: 'bot', text: botReply }]);
   };
+  
+
+  const fetchBotResponse = async (question: string) => {
+    try {
+      const res = await fetch('http://localhost:3333/ask', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt: question }),
+      });
+  
+      const data = await res.json();
+      return data.response;
+    } catch (err) {
+        console.error(err);
+        return 'Error contacting the AI.';
+      }
+      
+  };
+  
 
   return (
     <div className="fixed bottom-4 right-4 w-80 text-sm font-sans z-50">
