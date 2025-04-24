@@ -9,15 +9,22 @@ router.post('/', async (req, res) => {
   const HF_MODEL_URL = process.env.HF_MODEL_URL;
 
   try {
+    const formattedPrompt = `Question: ${prompt}\nAnswer:`;
+
     const response = await axios.post(
       HF_MODEL_URL!,
       {
-        inputs: prompt,
+        inputs: formattedPrompt,
       },
       {
         headers: {
           Authorization: `Bearer ${HF_API_KEY}`,
           'Content-Type': 'application/json',
+          'User-Agent': 'axios/1.8.4',
+          Accept: 'application/json',
+          'Accept-Encoding': 'gzip, deflate, br',
+          Connection: 'keep-alive',
+          Host: 'api-inference.huggingface.co',
         },
       }
     );
