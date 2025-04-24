@@ -1,0 +1,44 @@
+# ─── Logs ───────────────────────
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ─── Node Modules ───────────────
+node_modules/
+
+# ─── Build Artifacts ────────────
+dist/
+dist-ssr/
+build/
+.vite/
+
+# ─── Env & Secrets ──────────────
+.env
+.env.*.local
+
+# ─── Editor ─────────────────────
+.vscode/
+.idea/
+
+# ─── System Files ───────────────
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ─── Typescript ─────────────────
+*.tsbuildinfo
+
+# ─── Lock Files ─────────────────
+yarn.lock
+pnpm-lock.yaml
+
+# ─── Coverage ───────────────────
+coverage/
