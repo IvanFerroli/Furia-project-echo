@@ -42,3 +42,8 @@ pnpm-lock.yaml
 
 # ─── Coverage ───────────────────
 coverage/
+
+# Scraping WIP
+scripts/
+src/scraping/
+tsconfig.scrape.json

@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
 
 const router = Router();
 
@@ -9,7 +11,17 @@ router.post('/', async (req, res) => {
   const HF_MODEL_URL = process.env.HF_MODEL_URL;
 
   try {
-    const formattedPrompt = `Question: ${prompt}\nAnswer:`;
+    // Load roster context
+    const rosterPath = path.resolve(__dirname, '../../data/roster/current_roster.json');
+    const rosterRaw = fs.readFileSync(rosterPath, 'utf-8');
+    const roster = JSON.parse(rosterRaw);
+
+    // Format roster into readable context
+    const context = roster.map((player: any) =>
+      `- ${player.nickname} (${player.name}), role: ${player.role}, joined: ${player.joinDate}`
+    ).join('\n');
+
+    const formattedPrompt = `Context:\n${context}\n\nQuestion: ${prompt}\nAnswer:`;
 
     const response = await axios.post(
       HF_MODEL_URL!,
