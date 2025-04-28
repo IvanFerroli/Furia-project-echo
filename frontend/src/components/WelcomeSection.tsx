@@ -1,0 +1,19 @@
+interface WelcomeSectionProps {
+    toggleChat: () => void;
+    chatVisible: boolean;
+  }
+  
+  export default function WelcomeSection({ toggleChat, chatVisible }: WelcomeSectionProps) {
+    return (
+      <section className="flex flex-col items-center mt-10 px-6">
+        <h2 className="text-2xl font-bold mb-4">🔥 Join the FURIA Fan Chat 🔥</h2>
+        <button
+          onClick={toggleChat}
+          className="px-6 py-3 bg-black text-white rounded-full hover:bg-gray-800"
+        >
+          {chatVisible ? 'Close Chat' : 'Join the Chat'}
+        </button>
+      </section>
+    );
+  }
+  
