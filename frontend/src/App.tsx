@@ -1,9 +1,9 @@
-import FuriaFanWebchat from './components/FuriaFanWebchat';
 import LandingPage from './components/LandingPage';
+import FuriaFanWebchat from './components/FuriaFanWebchat';
 
 function App() {
   return (
-    <div className="min-h-screen bg-white text-black flex flex-col items-center justify-center">
+    <div className="min-h-screen bg-white flex flex-col">
       <LandingPage />
       <FuriaFanWebchat />
     </div>

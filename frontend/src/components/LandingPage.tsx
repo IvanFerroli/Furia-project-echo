@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import Header from './Header';
-import Hero from './Hero';
 import WelcomeSection from './WelcomeSection';
 import FloatingIcons from './FloatingIcons';
 import NewsCarousel from './NewsCarousel';
@@ -14,8 +13,8 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Header />
-      <Hero />
       <NewsCarousel />
+
       <WelcomeSection toggleChat={toggleChat} chatVisible={chatVisible} />
 
       {/* Chat Widget Placeholder */}
