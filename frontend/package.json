@@ -12,6 +12,7 @@
   "dependencies": {
     "@botpress/webchat": "2.3",
     "lucide-react": "^0.503.0",
+    "modern-css-reset": "^1.4.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0"

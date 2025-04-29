@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 
 export default function FuriaFanWebchat() {
   useEffect(() => {
-    // Inject the script dynamically
     const script = document.createElement('script');
     script.src = "https://cdn.botpress.cloud/webchat/v2.4/inject.js";
     script.async = true;
@@ -22,7 +21,6 @@ export default function FuriaFanWebchat() {
     document.body.appendChild(script);
 
     return () => {
-      // Clean up if needed when component unmounts
       script.remove();
     };
   }, []);

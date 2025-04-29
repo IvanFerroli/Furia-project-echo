@@ -14,29 +14,47 @@ export default function Header() {
 
   return (
     <header
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? 'bg-white shadow-md' : 'bg-white'
-      }`}
+      style={{
+        height: '76px',
+        backgroundColor: 'white',
+        zIndex: 99,
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        padding: '0 24px',
+        display: 'flex',
+        alignItems: 'center',
+        boxShadow: scrolled ? '0 4px 10px rgba(0, 0, 0, 0.1)' : 'none',
+        transition: 'box-shadow 0.3s ease-in-out',
+      }}
     >
-      <div className="max-w-screen-2xl mx-auto flex items-center justify-between px-6 py-2">
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%',
+        maxWidth: '1280px',
+        margin: '0 auto',
+      }}>
         {/* Left menu */}
-        <div className="flex gap-6 text-xs md:text-sm">
-          <a href="#" className="font-semibold hover:opacity-70">SHOP ALL</a>
-          <a href="#" className="font-semibold hover:opacity-70">COLLECTIONS</a>
-          <a href="#" className="font-semibold hover:opacity-70">OUTLET</a>
+        <div style={{ display: 'flex', gap: '16px', fontSize: '12px', fontWeight: 600 }}>
+          <a href="#" style={{ textDecoration: 'none', color: 'black' }}>SHOP ALL</a>
+          <a href="#" style={{ textDecoration: 'none', color: 'black' }}>COLLECTIONS</a>
+          <a href="#" style={{ textDecoration: 'none', color: 'black' }}>OUTLET</a>
         </div>
 
         {/* Center logo */}
-        <div className="flex justify-center">
-          <img src="/furia-logo.svg" alt="FURIA Logo" className="h-6 md:h-8" />
+        <div>
+          <img src="/furia-logo.svg" alt="FURIA Logo" style={{ height: '28px' }} />
         </div>
 
         {/* Right icons */}
-        <div className="flex gap-4 items-center">
-          <FaSearch size={18} className="cursor-pointer hover:opacity-70" />
-          <FaUser size={18} className="cursor-pointer hover:opacity-70" />
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <FaSearch size={16} color="black" style={{ cursor: 'pointer' }} />
+          <FaUser size={16} color="black" style={{ cursor: 'pointer' }} />
           <a href="https://furia.gg" target="_blank" rel="noopener noreferrer">
-            <FaShoppingBag size={18} className="cursor-pointer hover:opacity-70" />
+            <FaShoppingBag size={16} color="black" style={{ cursor: 'pointer' }} />
           </a>
         </div>
       </div>
