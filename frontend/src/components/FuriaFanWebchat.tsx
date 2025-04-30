@@ -25,8 +25,8 @@ export default function FuriaFanWebchat() {
       }
 
       #custom-panther-btn {
-        width: 36px;
-        height: 36px;
+        width: 50px;
+        height: 50px;
       }
     `;
     document.head.appendChild(style);
