@@ -27,14 +27,14 @@ export default function NewsCarousel() {
       {images.map((img, index) => (
         <div
           key={index}
-          className={`absolute w-full h-full bg-no-repeat bg-center bg-contain transition-all duration-700 ${index === current ? 'opacity-100' : 'opacity-0'
+          className={`absolute w-full h-full bg-no-repeat bg-top bg-contain transition-all duration-700 ${index === current ? 'opacity-100' : 'opacity-0'
             }`}
           style={{ backgroundImage: `url(${img})` }}
         />
       ))}
 
       {/* Navigation + Pagination Wrapper */}
-      <div className="absolute left-0 top-[1006px] w-full flex justify-between bg-black items-center px-6 z-20 h-[14px]">
+      <div className="absolute left-0 top-[700px] w-full flex justify-between bg-black items-center px-6 z-20 h-[14px]">
         {/* Arrows */}
         <button
           onClick={prevSlide}
