@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import data from '../data/threadChatMock.json';
 import Picker from '@emoji-mart/react';
 import dataEmoji from '@emoji-mart/data';
@@ -17,6 +17,7 @@ export default function FanThreadChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [nick, setNick] = useState<string>('');
   const [input, setInput] = useState<string>('');
+  const [replyInputs, setReplyInputs] = useState<Record<string, string>>({});
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
 
   useEffect(() => {
@@ -28,6 +29,11 @@ export default function FanThreadChat() {
       localStorage.setItem('messages', JSON.stringify(data));
     }
   }, []);
+
+  const saveMessages = (updatedMessages: Message[]) => {
+    setMessages(updatedMessages);
+    localStorage.setItem('messages', JSON.stringify(updatedMessages));
+  };
 
   const handleSend = () => {
     if (!nick || !input.trim()) return;
@@ -42,14 +48,64 @@ export default function FanThreadChat() {
       replies: [],
     };
 
-    const updatedMessages = [newMessage, ...messages];
-    setMessages(updatedMessages);
-    localStorage.setItem('messages', JSON.stringify(updatedMessages));
+    saveMessages([newMessage, ...messages]);
     setInput('');
+  };
+
+  const handleSendReply = (parentId: string) => {
+    if (!nick || !replyInputs[parentId]?.trim()) return;
+
+    const newReply: Message = {
+      id: Date.now().toString(),
+      author: nick,
+      text: replyInputs[parentId],
+      timestamp: new Date().toISOString(),
+      likes: 0,
+      dislikes: 0,
+      replies: [],
+    };
+
+    const updatedMessages = messages.map(msg => {
+      if (msg.id === parentId) {
+        return { ...msg, replies: [...msg.replies, newReply] };
+      }
+      return msg;
+    });
+
+    saveMessages(updatedMessages);
+    setReplyInputs(prev => ({ ...prev, [parentId]: '' }));
   };
 
   const handleEmojiSelect = (emoji: { native: string }) => {
     setInput(prev => prev + emoji.native);
+  };
+
+  const handleLike = (messageId: string, replyId?: string) => {
+    const updatedMessages = messages.map(msg => {
+      if (msg.id === messageId) {
+        if (replyId) {
+          const updatedReplies = msg.replies.map(rep => rep.id === replyId ? { ...rep, likes: rep.likes + 1 } : rep);
+          return { ...msg, replies: updatedReplies };
+        }
+        return { ...msg, likes: msg.likes + 1 };
+      }
+      return msg;
+    });
+    saveMessages(updatedMessages);
+  };
+
+  const handleDislike = (messageId: string, replyId?: string) => {
+    const updatedMessages = messages.map(msg => {
+      if (msg.id === messageId) {
+        if (replyId) {
+          const updatedReplies = msg.replies.map(rep => rep.id === replyId ? { ...rep, dislikes: rep.dislikes + 1 } : rep);
+          return { ...msg, replies: updatedReplies };
+        }
+        return { ...msg, dislikes: msg.dislikes + 1 };
+      }
+      return msg;
+    });
+    saveMessages(updatedMessages);
   };
 
   return (
@@ -72,26 +128,41 @@ export default function FanThreadChat() {
                 <strong>{msg.author}</strong>
                 <p>{msg.text}</p>
                 <div className="flex gap-2 mt-2">
-                  <button>👍 {msg.likes}</button>
-                  <button>👎 {msg.dislikes}</button>
+                  <button onClick={() => handleLike(msg.id)}>👍 {msg.likes}</button>
+                  <button onClick={() => handleDislike(msg.id)}>👎 {msg.dislikes}</button>
                 </div>
-                {msg.replies.length > 0 && (
-                  <details>
-                    <summary className="cursor-pointer text-sm text-blue-600 hover:text-blue-800">
-                      Ver respostas ({msg.replies.length})
-                    </summary>
+
+                <details className="mt-2">
+                  <summary className="cursor-pointer text-sm text-blue-600 hover:text-blue-800">
+                    Responder / Ver respostas ({msg.replies.length})
+                  </summary>
+                  <div className="mt-2 ml-4">
                     {msg.replies.map((rep) => (
-                      <div key={rep.id} className="ml-4 border-t pt-2">
+                      <div key={rep.id} className="border-t pt-2">
                         <strong>{rep.author}</strong>
                         <p>{rep.text}</p>
                         <div className="flex gap-2 mt-2">
-                          <button>👍 {rep.likes}</button>
-                          <button>👎 {rep.dislikes}</button>
+                          <button onClick={() => handleLike(msg.id, rep.id)}>👍 {rep.likes}</button>
+                          <button onClick={() => handleDislike(msg.id, rep.id)}>👎 {rep.dislikes}</button>
                         </div>
                       </div>
                     ))}
-                  </details>
-                )}
+
+                    <input
+                      className="border p-1 mt-2 w-full rounded"
+                      placeholder="Digite sua resposta"
+                      value={replyInputs[msg.id] || ''}
+                      onChange={(e) => setReplyInputs(prev => ({ ...prev, [msg.id]: e.target.value }))}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSendReply(msg.id)}
+                    />
+                    <button
+                      className="mt-2 bg-gray-300 text-black p-1 rounded w-full"
+                      onClick={() => handleSendReply(msg.id)}
+                    >
+                      Enviar resposta
+                    </button>
+                  </div>
+                </details>
               </div>
             ))}
           </div>
@@ -111,7 +182,7 @@ export default function FanThreadChat() {
               😊
             </button>
             {showEmojiPicker && (
-              <div className="absolute bottom-12 right-0">
+              <div className="absolute bottom-12 right-0 z-10">
                 <Picker data={dataEmoji} onEmojiSelect={handleEmojiSelect} />
               </div>
             )}
