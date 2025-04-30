@@ -11,6 +11,9 @@
   },
   "dependencies": {
     "@botpress/webchat": "2.3",
+    "@emoji-mart/data": "^1.2.1",
+    "@emoji-mart/react": "^1.1.1",
+    "emoji-mart": "^5.6.0",
     "lucide-react": "^0.503.0",
     "modern-css-reset": "^1.4.0",
     "react": "^19.0.0",
