@@ -41,10 +41,10 @@ export default function NewsCarousel() {
             />
           ))}
         </div>
-      </section>
-
       {/* Pagination outside the slide area */}
       <NewsCarouselPagination total={images.length} current={current} />
+      </section>
     </>
+
   );
 }
