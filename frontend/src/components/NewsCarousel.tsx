@@ -25,7 +25,7 @@ export default function NewsCarousel() {
   return (
     <>
       <section
-        className="relative h-[1062px] pt-[76px] flex items-center justify-center"
+        className="relative h-[950px] pt-[76px] flex items-center justify-center"
         style={{ width: '100%', overflowX: 'visible' }}
       >
         {/* Slides wrapper */}
