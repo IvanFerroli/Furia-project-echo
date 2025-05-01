@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react';
 import { FaShoppingBag, FaUser, FaSearch } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate();
+  const { user } = useAuth(); // returns null if not logged in
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,28 +35,33 @@ export default function Header() {
     >
       <div style={{
         display: 'flex',
-        justifyContent: 'space-between',
+        justifyContent: 'center', // center logo
         alignItems: 'center',
         width: '100%',
         maxWidth: '1280px',
         margin: '0 auto',
+        position: 'relative', // for absolute positioning
       }}>
-        {/* Left menu */}
-        <div style={{ display: 'flex', gap: '16px', fontSize: '12px', fontWeight: 600 }}>
-          <a href="#" style={{ textDecoration: 'none', color: 'black' }}>SHOP ALL</a>
-          <a href="#" style={{ textDecoration: 'none', color: 'black' }}>COLLECTIONS</a>
-          <a href="#" style={{ textDecoration: 'none', color: 'black' }}>OUTLET</a>
-        </div>
-
         {/* Center logo */}
         <div>
           <img src="/furia-logo.svg" alt="FURIA Logo" style={{ height: '28px' }} />
         </div>
 
         {/* Right icons */}
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+        <div style={{
+          display: 'flex',
+          gap: '12px',
+          alignItems: 'center',
+          position: 'absolute',
+          right: 0,
+        }}>
           <FaSearch size={16} color="black" style={{ cursor: 'pointer' }} />
-          <FaUser size={16} color="black" style={{ cursor: 'pointer' }} />
+          <FaUser
+            size={16}
+            color="black"
+            style={{ cursor: 'pointer' }}
+            onClick={() => navigate(user ? '/perfil' : '/entrar')}
+          />
           <a href="https://furia.gg" target="_blank" rel="noopener noreferrer">
             <FaShoppingBag size={16} color="black" style={{ cursor: 'pointer' }} />
           </a>
