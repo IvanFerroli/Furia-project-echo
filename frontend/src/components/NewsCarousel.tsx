@@ -42,7 +42,8 @@ export default function NewsCarousel() {
           ))}
         </div>
       {/* Pagination outside the slide area */}
-      <NewsCarouselPagination total={images.length} current={current} />
+      <NewsCarouselPagination total={images.length} current={current} onDotClick={(index) => setCurrent(index)} />
+
       </section>
     </>
 
