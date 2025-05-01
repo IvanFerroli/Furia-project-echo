@@ -55,10 +55,11 @@ export default function Header() {
         margin: '0 auto',
         position: 'relative',
       }}>
-        {/* Center logo */}
-        <div>
+        {/* Center logo com navegação */}
+        <div onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
           <img src="/furia-logo.svg" alt="FURIA Logo" style={{ height: '28px' }} />
         </div>
+
 
         {/* Right icons */}
         <div style={{
