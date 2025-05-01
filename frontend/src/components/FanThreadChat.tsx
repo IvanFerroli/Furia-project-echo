@@ -113,7 +113,7 @@ export default function FanThreadChat() {
   };
 
   return (
-    <div className="mt-[50px] mb-[100px] w-[90%] mx-auto rounded-[32px] bg-[#f9f9f9] shadow-xl flex flex-col max-h-[80vh]">
+    <div className="mt-[25px] mb-[100px] w-[90%] mx-auto rounded-[32px] bg-[#f9f9f9] shadow-xl flex flex-col max-h-[100vh]">
       {!nick && (
         <div className="p-4 bg-white rounded-t-[32px] shadow-md space-y-2">
           <input
@@ -137,7 +137,8 @@ export default function FanThreadChat() {
         <>
           <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-[#f9f9f9]">
             {messages.map((msg) => (
-              <div key={msg.id} className="bg-white rounded-2xl shadow-md p-4 space-y-3">
+              <div key={msg.id} className="bg-[#fbfbfb] border-[1px] border-[#ffffff] rounded-3xl shadow-sm p-4 space-y-3 my-[6px]"
+              >
                 <div className="flex items-center justify-between">
                   <strong className="text-gray-800">{msg.author}</strong>
                   <span className="text-xs text-gray-400">{new Date(msg.timestamp).toLocaleString()}</span>
@@ -158,17 +159,19 @@ export default function FanThreadChat() {
                   </summary>
                   <div className="mt-3 pl-4 border-l border-gray-200 space-y-3">
                     {msg.replies.map((rep) => (
-                      <div key={rep.id} className="bg-gray-100 rounded-xl p-3 shadow-sm">
+                      <div key={rep.id} className="bg-[#fefefe] border border-[#ffffff] rounded-2xl p-3 shadow-sm">
                         <div className="flex items-center justify-between">
                           <strong className="text-gray-700">{rep.author}</strong>
                           <span className="text-xs text-gray-400">{new Date(rep.timestamp).toLocaleString()}</span>
                         </div>
                         <p className="text-gray-700">{rep.text}</p>
                         <div className="flex gap-2 mt-1 text-xs">
-                          <button onClick={() => handleLike(msg.id, rep.id)} className="bg-gray-200 hover:bg-blue-100 text-gray-600 rounded-full px-2 py-1 shadow-sm">
+                          <button onClick={() => handleLike(msg.id, rep.id)} className="bg-white border border-[#f9f9f9] hover:bg-gray-100 text-gray-600 rounded-xl px-4 py-[6px] shadow-sm"
+                          >
                             👍 {rep.likes}
                           </button>
-                          <button onClick={() => handleDislike(msg.id, rep.id)} className="bg-gray-200 hover:bg-red-100 text-gray-600 rounded-full px-2 py-1 shadow-sm">
+                          <button onClick={() => handleDislike(msg.id, rep.id)} className="bg-white border border-[#f9f9f9] hover:bg-gray-100 text-gray-600 rounded-xl px-4 py-[6px] shadow-sm"
+                          >
                             👎 {rep.dislikes}
                           </button>
                         </div>
