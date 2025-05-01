@@ -113,7 +113,7 @@ export default function FanThreadChat() {
   };
 
   return (
-    <div className="mt-[25px] mb-[100px] w-[90%] mx-auto rounded-[32px] bg-[#f9f9f9] shadow-xl flex flex-col max-h-[100vh]">
+    <div className="mt-[50px] mb-[100px] w-[90%] mx-auto rounded-[32px] bg-[#f9f9f9] shadow-xl flex flex-col max-h-[100vh]">
       {!nick && (
         <div className="p-4 bg-white rounded-t-[32px] shadow-md space-y-2">
           <input

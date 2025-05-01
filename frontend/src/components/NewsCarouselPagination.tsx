@@ -17,7 +17,7 @@ export default function NewsCarouselPagination({
           } shadow-md border border-gray-400 flex items-center justify-center transition-all`}
         >
           {current === index && (
-            <div className="w-[6px] h-[6px] rounded-full border-[4px] border-white" />
+            <div className="w-[4px] h-[4px] rounded-full border-[4px] border-white" />
           )}
         </div>
       ))}
