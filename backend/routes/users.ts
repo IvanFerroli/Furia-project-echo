@@ -1,0 +1,14 @@
+import { Router } from "express";
+import {
+	getUser,
+	patchUser,
+	getUserMetrics,
+} from "../controllers/usersController";
+
+const router = Router();
+
+router.get("/:id", (req, res) => void getUser(req, res));
+router.patch("/:id", (req, res) => void patchUser(req, res));
+router.get("/:id/metrics", (req, res) => void getUserMetrics(req, res));
+
+export default router;

@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",                            // 🔥 JS moderno
+    "module": "ESNext",                            // 🔄 Suporte a ESM (tsx)
+    "moduleResolution": "Node",                    // 📦 Resolve via node_modules
+    "esModuleInterop": true,                       // ✅ Suporte a imports comuns
+    "forceConsistentCasingInFileNames": true,      // ⛔ evita bugs em sistemas case-sensitive
+    "strict": true,                                // ✅ type checking rigoroso
+    "skipLibCheck": true,                          // ✅ ignora .d.ts de libs (melhora performance)
+    "resolveJsonModule": true,                     // ✅ importa arquivos .json direto
+    "outDir": "./dist",                            // 📁 saída separada
+    "rootDir": "./",                               // 📁 entrada é a raiz do backend
+    "isolatedModules": true                        // 🧱 obriga modularização segura
+  },
+  "include": ["./**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}
