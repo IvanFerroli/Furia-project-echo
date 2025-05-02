@@ -11,7 +11,14 @@ const mockAwards = [
 ]
 
 export default function ProfileAwards() {
-  const [awards, setAwards] = useState([])
+    type Award = {
+        icon: string
+        name: string
+        date: string
+      }
+      
+      const [awards, setAwards] = useState<Award[]>([])
+      
 
   useEffect(() => {
     // Simulating async fetch
