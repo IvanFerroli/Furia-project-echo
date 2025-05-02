@@ -3,7 +3,7 @@ import { useNavigate, NavLink, Outlet } from 'react-router-dom'
 import { auth } from '../../services/firebase'
 
 export default function ProfileLayout() {
-    const { user } = useAuth()
+    const { user, isAdmin } = useAuth()
     const navigate = useNavigate()
 
     const handleLogout = async () => {
@@ -24,6 +24,11 @@ export default function ProfileLayout() {
         { path: 'awards', label: 'Premiações' },
         { path: 'metricas', label: 'Métricas' }
     ]
+    
+    if (isAdmin) {
+        menuItems.push({ path: 'dashboard', label: 'Dashboard de Usuários' })
+      }
+      
 
     return (
         <div className="min-h-[calc(100vh-76px)] flex bg-gradient-to-br from-zinc-50 to-white">

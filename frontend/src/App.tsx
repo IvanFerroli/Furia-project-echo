@@ -1,15 +1,16 @@
-import { Routes, Route } from 'react-router-dom';
-import LandingPage from './components/LandingPage';
-import FuriaFanWebchat from './components/FuriaFanWebchat';
-import Header from './components/Header';
-import Login from './pages/Login';
-import ProtectedRoute from './routes/ProtectedRoute';
+import { Routes, Route } from 'react-router-dom'
+import LandingPage from './components/LandingPage'
+import FuriaFanWebchat from './components/FuriaFanWebchat'
+import Header from './components/Header'
+import Login from './pages/Login'
+import ProtectedRoute from './routes/ProtectedRoute'
 
 // Novo layout de perfil + subrotas
-import ProfileLayout from './pages/perfil/ProfileLayout';
-import ProfileInfo from './pages/perfil/ProfileInfo';
-import ProfileAwards from './pages/perfil/ProfileAwards';
-import ProfileMetrics from './pages/perfil/ProfileMetrics';
+import ProfileLayout from './pages/perfil/ProfileLayout'
+import ProfileInfo from './pages/perfil/ProfileInfo'
+import ProfileAwards from './pages/perfil/ProfileAwards'
+import ProfileMetrics from './pages/perfil/ProfileMetrics'
+import ProfileDashboard from './pages/perfil/ProfileDashboard' // ✅ novo
 
 export default function App() {
   return (
@@ -40,9 +41,17 @@ export default function App() {
             <Route path="info" element={<ProfileInfo />} />
             <Route path="awards" element={<ProfileAwards />} />
             <Route path="metricas" element={<ProfileMetrics />} />
+            <Route
+              path="dashboard"
+              element={
+                <ProtectedRoute adminOnly>
+                  <ProfileDashboard />
+                </ProtectedRoute>
+              }
+            />
           </Route>
         </Routes>
       </div>
     </div>
-  );
+  )
 }

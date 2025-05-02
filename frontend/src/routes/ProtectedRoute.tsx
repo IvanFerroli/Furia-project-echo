@@ -1,13 +1,20 @@
-import React, { ReactNode } from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import React, { ReactNode } from 'react'
+import { Navigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 
-export default function ProtectedRoute({ children }: { children: ReactNode }) {
-  const { user, loading } = useAuth();
+interface ProtectedRouteProps {
+  children: ReactNode
+  adminOnly?: boolean
+}
 
-  if (loading) return <div className="text-center p-10">Carregando...</div>;
+export default function ProtectedRoute({ children, adminOnly = false }: ProtectedRouteProps) {
+  const { user, loading, isAdmin } = useAuth()
 
-  if (!user) return <Navigate to="/entrar" replace />;
+  if (loading) return <div className="text-center p-10">Carregando...</div>
 
-  return <>{children}</>;
+  if (!user) return <Navigate to="/entrar" replace />
+
+  if (adminOnly && !isAdmin) return <Navigate to="/" replace />
+
+  return <>{children}</>
 }
