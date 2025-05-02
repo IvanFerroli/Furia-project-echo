@@ -1,83 +1,99 @@
-import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate, NavLink, Outlet } from 'react-router-dom';
-import { auth } from '../../services/firebase';
+import { useAuth } from '../../contexts/AuthContext'
+import { useNavigate, NavLink, Outlet } from 'react-router-dom'
+import { auth } from '../../services/firebase'
 
 export default function ProfileLayout() {
-  const { user } = useAuth();
-  const navigate = useNavigate();
+    const { user } = useAuth()
+    const navigate = useNavigate()
 
-  const handleLogout = async () => {
-    await auth.signOut();
-    navigate('/entrar');
-  };
+    const handleLogout = async () => {
+        await auth.signOut()
+        navigate('/entrar')
+    }
 
-  if (!user) {
+    if (!user) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <p>Carregando perfil...</p>
+            </div>
+        )
+    }
+
+    const menuItems = [
+        { path: 'info', label: 'Informações' },
+        { path: 'awards', label: 'Premiações' },
+        { path: 'metricas', label: 'Métricas' }
+    ]
+
     return (
-      <div className="flex justify-center items-center h-screen">
-        <p>Carregando perfil...</p>
-      </div>
-    );
-  }
+        <div className="min-h-[calc(100vh-76px)] flex bg-gradient-to-br from-zinc-50 to-white">
+            {/* Side Menu */}
+            <aside
+                className="w-[280px] p-6 flex flex-col gap-6 rounded-md"
+                style={{
+                    backgroundColor: '#f9f9f9',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.06)'
+                }}
+            >
+                <div className="flex flex-col items-center mb-6 text-center">
+                    <img
+                        src={user.photoURL || '/furia-logo.svg'}
+                        alt="Avatar"
+                        className="w-24 h-24 rounded-full shadow-lg ring-2 ring-zinc-700 ring-opacity-60 object-cover"
+                    />
+                    <h2 className="text-xl font-bold text-zinc-800 mt-3">{user.displayName || 'Furioso(a)'}</h2>
+                    <p className="text-xs text-zinc-500">{user.email}</p>
+                </div>
 
-  return (
-    <div className="min-h-screen flex bg-gray-100">
-      {/* Side Menu */}
-      <aside className="w-[260px] bg-white shadow-md p-6 flex flex-col gap-4">
-        <div className="flex flex-col items-center mb-6">
-          <img
-            src={user.photoURL || '/furia-logo.svg'}
-            alt="Avatar"
-            className="w-20 h-20 rounded-full mb-2 object-cover"
-          />
-          <h2 className="text-lg font-semibold text-center">{user.displayName || 'Furioso(a)'}</h2>
-          <p className="text-xs text-gray-500 text-center">{user.email}</p>
+                <div className="flex flex-col gap-3">
+                    {menuItems.map((item) => (
+                        <NavLink
+                            key={item.path}
+                            to={item.path}
+                            className="block w-full"
+                        >
+                            {({ isActive }) => (
+                                <button
+                                    type="button"
+                                    className={`w-full text-left px-4 py-2 text-sm font-semibold transition-all duration-200 ease-in-out hover:scale-[1.02] active:scale-95 ${isActive ? 'scale-[1.01]' : ''
+                                        }`}
+                                    style={{
+                                        backgroundColor: isActive ? '#1f1f1f' : '#f2f2f2',
+                                        color: isActive ? '#ffffff' : '#1f1f1f',
+                                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.06)',
+                                        border: 'none', // ✅ kill native border
+                                        outline: 'none', // ✅ kill focus ring
+                                        borderRadius: '6px', // ✅ subtle rounding
+                                        transition: 'all 0.2s ease-in-out',
+                                    }}
+                                    onMouseOver={e => {
+                                        if (!isActive) {
+                                            (e.currentTarget as HTMLElement).style.backgroundColor = '#ebebeb'
+                                        }
+                                    }}
+                                    onMouseOut={e => {
+                                        if (!isActive) {
+                                            (e.currentTarget as HTMLElement).style.backgroundColor = '#f2f2f2'
+                                        }
+                                    }}
+                                >
+                                    {item.label}
+                                </button>
+
+                            )}
+                        </NavLink>
+                    ))}
+                </div>
+            </aside>
+
+
+
+            {/* Main Content */}
+            <main className="flex-1 p-10">
+                <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-md p-8 transition-all hover:shadow-lg">
+                    <Outlet />
+                </div>
+            </main>
         </div>
-
-        <nav className="flex flex-col gap-2">
-          <NavLink
-            to="info"
-            className={({ isActive }) =>
-              `px-4 py-2 rounded-md text-sm font-medium ${
-                isActive ? 'bg-black text-white' : 'text-gray-800 hover:bg-gray-200'
-              }`
-            }
-          >
-            Informações
-          </NavLink>
-          <NavLink
-            to="awards"
-            className={({ isActive }) =>
-              `px-4 py-2 rounded-md text-sm font-medium ${
-                isActive ? 'bg-black text-white' : 'text-gray-800 hover:bg-gray-200'
-              }`
-            }
-          >
-            Premiações
-          </NavLink>
-          <NavLink
-            to="metricas"
-            className={({ isActive }) =>
-              `px-4 py-2 rounded-md text-sm font-medium ${
-                isActive ? 'bg-black text-white' : 'text-gray-800 hover:bg-gray-200'
-              }`
-            }
-          >
-            Métricas
-          </NavLink>
-        </nav>
-
-        <button
-          onClick={handleLogout}
-          className="mt-auto bg-red-600 text-white text-sm px-4 py-2 rounded-md hover:bg-red-700"
-        >
-          Sair da conta
-        </button>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 p-8">
-        <Outlet />
-      </main>
-    </div>
-  );
+    )
 }

@@ -1,10 +1,9 @@
-@import "modern-css-reset"; /* only if you're using it */
-
+@import "modern-css-reset";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-html, body, #root {
+/* html, body, #root {
   height: 100%;
   width: 100%;
   margin: 0;
@@ -12,3 +11,4 @@ html, body, #root {
   background-color: white;
   overflow-x: hidden;
 }
+ */
