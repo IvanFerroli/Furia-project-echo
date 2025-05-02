@@ -29,7 +29,7 @@ export default function ProfileLayout() {
         <div className="min-h-[calc(100vh-76px)] flex bg-gradient-to-br from-zinc-50 to-white">
             {/* Side Menu */}
             <aside
-                className="w-[280px] p-6 flex flex-col gap-6 rounded-md"
+                className="w-[280px] pt-[5px] p-6 flex flex-col gap-6 rounded-md"
                 style={{
                     backgroundColor: '#f9f9f9',
                     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.06)'
