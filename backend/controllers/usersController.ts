@@ -3,9 +3,9 @@ import {
 	getUserById,
 	updateUserProfile,
 	getUserMetrics as getUserMetricsModel,
+	createUserIfMissing,
 } from "../models/user";
 import validateCpf from "../utils/validateCpf";
-import { createUserIfMissing } from "../models/user";
 
 export const getUser = async (req: Request, res: Response): Promise<void> => {
 	try {
@@ -22,7 +22,8 @@ export const getUser = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const patchUser = async (req: Request, res: Response): Promise<void> => {
-	const { nickname, profile_image, bio, city, birthdate, cpf } = req.body;
+	const { nickname, profile_image, bio, city, birthdate, cpf, cep } = req.body;
+
 	const userId = req.params.id;
 
 	const isCpfValid = !cpf || validateCpf(cpf);
@@ -36,21 +37,24 @@ export const patchUser = async (req: Request, res: Response): Promise<void> => {
 		profile_image &&
 		bio &&
 		city &&
-		birthdate
+		birthdate &&
+		cep
 	);
 	const verified = !!cpf && isCpfValid;
 
 	try {
 		await updateUserProfile(userId, {
-			nickname,
-			profile_image,
-			bio,
-			city,
-			birthdate,
-			cpf,
-			profile_completed,
-			verified,
-		});
+            nickname,
+            profile_image,
+            bio,
+            city,
+            birthdate,
+            cpf,
+            cep,
+            profile_completed,
+            verified,
+          });
+          
 		res.json({ message: "Profile updated" });
 	} catch (err) {
 		console.error("patchUser error:", err);

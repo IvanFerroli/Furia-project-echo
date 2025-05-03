@@ -1,6 +1,11 @@
 import { useAuth } from '../../contexts/AuthContext'
 import { useState, useEffect } from 'react'
 import { updateUserProfile } from '../../services/updateUserProfile'
+import { getUserProfile } from '../../services/getUserProfile'
+import { ProfileData } from '../../types/ProfileData'
+
+
+
 
 export default function ProfileInfo() {
     const { user } = useAuth()
@@ -11,8 +16,10 @@ export default function ProfileInfo() {
     const [city, setCity] = useState('')
     const [birthdate, setBirthdate] = useState('')
     const [cpf, setCpf] = useState('')
-
+    const [cep, setCep] = useState('');
     const [isCpfValid, setIsCpfValid] = useState(false)
+    const [isCepValid, setIsCepValid] = useState(false)
+
     const [completion, setCompletion] = useState(0)
 
     useEffect(() => {
@@ -23,20 +30,74 @@ export default function ProfileInfo() {
     }, [user])
 
     useEffect(() => {
-        const fields = [nickname, photo, bio, city, birthdate]
-        const filledFields = fields.filter(Boolean).length
-        const progress = Math.round((filledFields / fields.length) * 100)
+        const formatCep = (cep: string): string => {
+            const digits = cep.replace(/\D/g, '').slice(0, 8)
+            const match = digits.match(/^(\d{2})(\d{3})(\d{0,3})$/)
+            return match ? `${match[1]}.${match[2]}-${match[3]}` : digits
+        }
+        
 
-        const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/
-        const validCpf = cpf.length === 0 || cpfRegex.test(cpf)
+        const fetchProfileData = async () => {
+            if (!user?.uid) return;
 
-        setIsCpfValid(validCpf)
-        setCompletion(validCpf ? progress : Math.min(progress, 99))
-    }, [nickname, photo, bio, city, birthdate, cpf])
+            try {
+                const profile: ProfileData = await getUserProfile(user.uid);
+
+                setNickname(profile.nickname || '');
+                setPhoto(profile.profile_image || '');
+                setBio(profile.bio || '');
+                setCep(formatCep(profile.cep || ''));
+                setBirthdate(profile.birthdate?.split('T')[0] || '');
+                setCpf(profile.cpf || '');
+                setCity(profile.city || '');
+            } catch (err) {
+                console.error('Failed to fetch user profile:', err);
+            }
+        };
+
+        fetchProfileData();
+    }, [user]);
+
+
+    useEffect(() => {
+        const fetchCity = async () => {
+            const fields = [nickname, photo, bio, city, birthdate, cep];
+            const filledFields = fields.filter(Boolean).length;
+            const progress = Math.round((filledFields / fields.length) * 100);
+
+            const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
+            const validCpf = cpf.length === 0 || cpfRegex.test(cpf);
+
+            setIsCpfValid(validCpf);
+            setCompletion(validCpf ? progress : Math.min(progress, 99));
+
+            const rawCep = cep.replace(/\D/g, '');
+            if (rawCep.length === 8) {
+                try {
+                    const response = await fetch(`https://viacep.com.br/ws/${rawCep}/json/`);
+                    const data = await response.json();
+                    if (!data.erro && data.localidade) {
+                        setCity(`${data.localidade} - ${data.uf}`);
+                        setIsCepValid(true);
+                    } else {
+                        setIsCepValid(false);
+                    }
+                } catch (error) {
+                    console.error("Erro ao buscar cidade pelo CEP:", error);
+                    setIsCepValid(false);
+                }
+            } else {
+                setIsCepValid(false);
+            }
+        };
+
+        fetchCity();
+    }, [nickname, photo, bio, city, birthdate, cpf, cep]);
+
 
 
     const handleSave = async () => {
-        if (!user?.uid) return
+        if (!user?.uid) return;
 
         try {
             await updateUserProfile(user.uid, {
@@ -45,14 +106,15 @@ export default function ProfileInfo() {
                 bio,
                 city,
                 birthdate,
-                cpf
-            })
-            alert('Perfil salvo com sucesso!')
+                cpf,
+                cep,
+            });
+            alert('Perfil salvo com sucesso!');
         } catch (err) {
-            console.error('Erro ao salvar perfil:', err)
-            alert('Erro ao salvar perfil.')
+            console.error('Erro ao salvar perfil:', err);
+            alert('Erro ao salvar perfil.');
         }
-    }
+    };
 
 
     return (
@@ -125,6 +187,23 @@ export default function ProfileInfo() {
                 </aside>
                 {/* Coluna direita */}
                 <aside className="flex flex-col gap-6 w-full min-[500px]:w-[45%]" style={{ gap: '36px' }}>
+                    {/* CEP */}
+                    <div className="flex flex-col gap-2">
+                        <label className="text-[12px] text-[#333] font-normal">CEP</label>
+                        <input
+                            type="text"
+                            value={cep}
+                            onChange={(e) => setCep(e.target.value)}
+                            className={`h-10 px-4 text-[12px] border rounded-sm ${cep.length === 10 && !isCepValid ? 'border-red-500' : 'border-black'}`}
+                            placeholder="00.000-000"
+                            style={{ padding: '10px 10px' }}
+                        />
+                        {cep.length === 10 && !isCepValid && (
+                            <span className="text-xs text-red-500">CEP inválido</span>
+                        )}
+                    </div>
+
+
                     <div className="flex flex-col gap-2">
                         <label className="text-[12px] text-[#333] font-normal">Cidade</label>
                         <input
@@ -148,14 +227,18 @@ export default function ProfileInfo() {
                         />
                     </div>
 
+                    {/* CPF */}
                     <div className="flex flex-col gap-2">
                         <label className="text-[12px] text-[#333] font-normal">CPF (opcional)</label>
                         <input
                             type="text"
                             value={cpf}
-                            onChange={(e) => setCpf(e.target.value)}
-                            className={`h-10 px-4 text-[12px] border rounded-sm ${cpf.length > 0 && !isCpfValid ? 'border-red-500' : 'border-black'
-                                }`}
+                            onChange={(e) => {
+                                const raw = e.target.value.replace(/\D/g, '').slice(0, 11)
+                                const masked = raw.replace(/^(\d{3})(\d{3})(\d{3})(\d{0,2})$/, (_, p1, p2, p3, p4) => `${p1}.${p2}.${p3}-${p4}`)
+                                setCpf(masked)
+                            }}
+                            className={`h-10 px-4 text-[12px] border rounded-sm ${cpf.length > 0 && !isCpfValid ? 'border-red-500' : 'border-black'}`}
                             placeholder="000.000.000-00"
                             style={{ padding: '10px 10px' }}
                         />
@@ -163,6 +246,7 @@ export default function ProfileInfo() {
                             <span className="text-xs text-red-500">Formato inválido</span>
                         )}
                     </div>
+
 
                     <button
                         onClick={handleSave}
@@ -191,6 +275,7 @@ export default function ProfileInfo() {
                         </div>
                     )}
                 </aside>
+
 
             </div>
         </div>
