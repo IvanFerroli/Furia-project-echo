@@ -5,6 +5,7 @@ import {
 	getUserMetrics as getUserMetricsModel,
 } from "../models/user";
 import validateCpf from "../utils/validateCpf";
+import { createUserIfMissing } from "../models/user";
 
 export const getUser = async (req: Request, res: Response): Promise<void> => {
 	try {
@@ -30,7 +31,13 @@ export const patchUser = async (req: Request, res: Response): Promise<void> => {
 		return;
 	}
 
-	const profile_completed = !!(nickname && profile_image && bio && city && birthdate);
+	const profile_completed = !!(
+		nickname &&
+		profile_image &&
+		bio &&
+		city &&
+		birthdate
+	);
 	const verified = !!cpf && isCpfValid;
 
 	try {
@@ -51,12 +58,40 @@ export const patchUser = async (req: Request, res: Response): Promise<void> => {
 	}
 };
 
-export const getUserMetrics = async (req: Request, res: Response): Promise<void> => {
+export const getUserMetrics = async (
+	req: Request,
+	res: Response
+): Promise<void> => {
 	try {
 		const metrics = await getUserMetricsModel(req.params.id);
 		res.json(metrics);
 	} catch (err) {
 		console.error("getUserMetrics error:", err);
+		res.status(500).json({ message: "Internal server error" });
+	}
+};
+
+export const createUserIfNotExists = async (
+	req: Request,
+	res: Response
+): Promise<void> => {
+	const { id, email, displayName, photoURL } = req.body;
+
+	if (!id || !email) {
+		res.status(400).json({ message: "Missing id or email" });
+		return;
+	}
+
+	try {
+		await createUserIfMissing({
+			id,
+			email,
+			nickname: displayName,
+			profile_image: photoURL,
+		});
+		res.status(200).json({ message: "User checked/created" });
+	} catch (err) {
+		console.error("createUserIfNotExists error:", err);
 		res.status(500).json({ message: "Internal server error" });
 	}
 };

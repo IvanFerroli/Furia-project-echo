@@ -2,8 +2,7 @@
 
 -- 🚀 USERS
 CREATE TABLE users (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  firebase_uid VARCHAR(128) NOT NULL,
+  id VARCHAR(255) PRIMARY KEY,
   email VARCHAR(255),
   nickname VARCHAR(100),
   profile_image TEXT,
@@ -19,7 +18,7 @@ CREATE TABLE users (
 -- 💬 MESSAGES
 CREATE TABLE messages (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id INT,
+  user_id VARCHAR(255),
   nickname VARCHAR(100),
   text TEXT,
   timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -32,7 +31,7 @@ CREATE TABLE messages (
 -- 🏆 AWARDS
 CREATE TABLE awards (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id INT,
+  user_id VARCHAR(255),
   award_type VARCHAR(100),
   awarded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id)

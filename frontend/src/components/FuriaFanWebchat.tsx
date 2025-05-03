@@ -1,5 +1,14 @@
 import { useEffect } from 'react';
 
+declare global {
+  interface Window {
+    botpress?: {
+      init: (config: any) => void;
+      toggle: () => void;
+    };
+  }
+}
+
 export default function FuriaFanWebchat() {
   useEffect(() => {
     const style = document.createElement('style');
@@ -79,3 +88,5 @@ export default function FuriaFanWebchat() {
     </>
   );
 }
+
+export { }

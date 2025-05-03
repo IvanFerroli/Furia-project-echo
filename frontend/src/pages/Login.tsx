@@ -10,12 +10,28 @@ export default function Login() {
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      await fetch("http://localhost:3001/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+        }),
+      });
+
       navigate('/perfil'); // redirect after login
     } catch (error) {
       console.error('Google sign-in error:', error);
     }
   };
+
 
   return (
     <div style={{

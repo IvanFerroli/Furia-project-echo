@@ -56,7 +56,6 @@ export async function updateUserProfile(
 }
 
 export async function getUserMetrics(id: string) {
-	// Você pode adaptar essa consulta para refletir sua estrutura de mensagens real
 	const [[stats]] = await db.query<any[]>(
 		`SELECT
       (SELECT COUNT(*) FROM messages WHERE user_id = ?) AS total_posts,
@@ -68,4 +67,28 @@ export async function getUserMetrics(id: string) {
 	);
 
 	return stats;
+}
+
+export async function createUserIfMissing({
+	id,
+	email,
+	nickname = null,
+	profile_image = null,
+}: {
+	id: string;
+	email: string;
+	nickname?: string | null;
+	profile_image?: string | null;
+}) {
+	const [rows] = await db.query<any[]>("SELECT id FROM users WHERE id = ?", [
+		id,
+	]);
+
+	if (rows.length === 0) {
+		await db.query(
+            `INSERT INTO users (id, firebase_uid, email, nickname, profile_image) VALUES (?, ?, ?, ?, ?)`,
+            [id, id, email, nickname, profile_image]
+          );
+          
+	}
 }

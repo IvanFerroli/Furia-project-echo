@@ -1,5 +1,6 @@
 import { useAuth } from '../../contexts/AuthContext'
 import { useState, useEffect } from 'react'
+import { updateUserProfile } from '../../services/updateUserProfile'
 
 export default function ProfileInfo() {
     const { user } = useAuth()
@@ -33,17 +34,26 @@ export default function ProfileInfo() {
         setCompletion(validCpf ? progress : Math.min(progress, 99))
     }, [nickname, photo, bio, city, birthdate, cpf])
 
-    const handleSave = () => {
-        console.log('Perfil salvo:', {
-            nickname,
-            photo,
-            bio,
-            city,
-            birthdate,
-            cpf
-        })
-        alert('Perfil salvo com sucesso (simulado)')
+
+    const handleSave = async () => {
+        if (!user?.uid) return
+
+        try {
+            await updateUserProfile(user.uid, {
+                nickname,
+                profile_image: photo,
+                bio,
+                city,
+                birthdate,
+                cpf
+            })
+            alert('Perfil salvo com sucesso!')
+        } catch (err) {
+            console.error('Erro ao salvar perfil:', err)
+            alert('Erro ao salvar perfil.')
+        }
     }
+
 
     return (
         <div
@@ -119,7 +129,7 @@ export default function ProfileInfo() {
                         <label className="text-[12px] text-[#333] font-normal">Cidade</label>
                         <input
                             type="text"
-                            value={city}    
+                            value={city}
                             onChange={(e) => setCity(e.target.value)}
                             className="h-10 px-4 text-[12px] border border-black rounded-sm"
                             placeholder="Ex: São Paulo"
@@ -163,7 +173,7 @@ export default function ProfileInfo() {
                             border: '0',
                             outline: '0',
                             boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
-                            padding: '10px 10px' 
+                            padding: '10px 10px'
                         }}
                         onMouseOver={(e) => {
                             e.currentTarget.style.backgroundColor = '#222'

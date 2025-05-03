@@ -1,22 +1,29 @@
-import cors from 'cors';
+import express from 'express'
+import cors from 'cors'
+import dotenv from 'dotenv'
 
-import { Request, Response, NextFunction } from 'express';
-// Se estiver com "resolveJsonModule": true no tsconfig:
-import adminEmails from './utils/admin-emails.json' assert { type: 'json' };
+import adminRoutes from './routes/admin'
+import userRoutes from './routes/users'
+import awardsRoutes from './routes/awards'
+import messagesRoutes from './routes/messages'
 
+dotenv.config()
 
-export default function isAdmin(req: Request, res: Response, next: NextFunction) {
-  const email = req.headers['x-user-email'];
+const app = express()
+const port = process.env.PORT || 3001
 
-  if (!email || typeof email !== 'string') {
-    return res.status(401).json({ message: 'Admin email not provided' });
-  }
+app.use(cors())
+app.use(express.json())
 
-  const isAuthorized = (adminEmails as string[]).includes(email);
+app.use('/admin', adminRoutes)
+app.use('/users', userRoutes)
+app.use('/awards', awardsRoutes)
+app.use('/messages', messagesRoutes)
 
-  if (!isAuthorized) {
-    return res.status(403).json({ message: 'Access denied: not an admin' });
-  }
+app.get('/', (req, res) => {
+  res.send('FURIA Fan Chat API running 🟢')
+})
 
-  next();
-}
+app.listen(port, () => {
+  console.log(`Servidor rodando em http://localhost:${port}`)
+})
