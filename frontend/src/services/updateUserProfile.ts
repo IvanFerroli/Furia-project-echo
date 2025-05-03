@@ -7,6 +7,8 @@ type ProfileData = {
   city: string
   birthdate: string
   cpf?: string
+  profile_completed?: boolean
+  verified?: boolean
 }
 
 export const updateUserProfile = async (userId: string, data: ProfileData) => {
