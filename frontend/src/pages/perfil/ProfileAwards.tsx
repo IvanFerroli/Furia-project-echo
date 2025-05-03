@@ -1,29 +1,27 @@
 import { useEffect, useState } from 'react'
-
-const mockAwards = [
-  { icon: '🔥', name: 'Daily Streak Warrior', date: '2025-04-30' },
-  { icon: '🏆', name: 'Full Built', date: '2025-05-01' },
-  { icon: '🛡️', name: 'Oldschool', date: '2025-04-25' },
-  { icon: '✅', name: 'Verified User', date: '2025-04-29' },
-  { icon: '💬', name: 'Thread King', date: '2025-04-28' },
-  { icon: '💎', name: 'Gold Rank', date: '2025-04-27' },
-  { icon: '📈', name: 'Top Likes of the Month', date: '2025-04-26' },
-]
+import { useAuth } from '../../contexts/AuthContext'
+import { getUserAwards } from '../../services/getUserAwards'
+import { Award, MappedAward, mapAward } from '../../types/Award'
 
 export default function ProfileAwards() {
-    type Award = {
-        icon: string
-        name: string
-        date: string
-      }
-      
-      const [awards, setAwards] = useState<Award[]>([])
-      
+  const { user } = useAuth()
+  const [awards, setAwards] = useState<MappedAward[]>([])
 
   useEffect(() => {
-    // Simulating async fetch
-    setTimeout(() => setAwards(mockAwards), 300)
-  }, [])
+    const fetchAwards = async () => {
+      if (!user) return
+
+      try {
+        const rawAwards: Award[] = await getUserAwards(user.uid)
+        const mapped = rawAwards.map(mapAward)
+        setAwards(mapped)
+      } catch (error) {
+        console.error('Erro ao buscar awards:', error)
+      }
+    }
+
+    fetchAwards()
+  }, [user])
 
   return (
     <div
@@ -46,7 +44,7 @@ export default function ProfileAwards() {
             <span className="text-3xl">{award.icon}</span>
             <div>
               <p className="text-sm font-semibold text-zinc-800">{award.name}</p>
-              <p className="text-xs text-zinc-500">{new Date(award.date).toLocaleDateString('pt-BR')}</p>
+              <p className="text-xs text-zinc-500">{award.date}</p>
             </div>
           </li>
         ))}

@@ -5,6 +5,7 @@ import {
 	getUserMetrics as getUserMetricsModel,
 	createUserIfMissing,
 } from "../models/user";
+import { checkAwardExists, assignAward, removeAward } from "../models/award";
 import validateCpf from "../utils/validateCpf";
 
 export const getUser = async (req: Request, res: Response): Promise<void> => {
@@ -22,7 +23,8 @@ export const getUser = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const patchUser = async (req: Request, res: Response): Promise<void> => {
-	const { nickname, profile_image, bio, city, birthdate, cpf, cep } = req.body;
+	const { nickname, profile_image, bio, city, birthdate, cpf, cep } =
+		req.body;
 
 	const userId = req.params.id;
 
@@ -44,17 +46,32 @@ export const patchUser = async (req: Request, res: Response): Promise<void> => {
 
 	try {
 		await updateUserProfile(userId, {
-            nickname,
-            profile_image,
-            bio,
-            city,
-            birthdate,
-            cpf,
-            cep,
-            profile_completed,
-            verified,
-          });
-          
+			nickname,
+			profile_image,
+			bio,
+			city,
+			birthdate,
+			cpf,
+			cep,
+			profile_completed,
+			verified,
+		});
+
+		// 🎖️ Award logic
+		const hasAward = await checkAwardExists(userId, "full_profile");
+		if (profile_completed && !hasAward) {
+			await assignAward(userId, "full_profile");
+		} else if (!profile_completed && hasAward) {
+			await removeAward(userId, "full_profile");
+		}
+
+		const hasVerifiedAward = await checkAwardExists(userId, "verified");
+		if (verified && !hasVerifiedAward) {
+			await assignAward(userId, "verified");
+		} else if (!verified && hasVerifiedAward) {
+			await removeAward(userId, "verified");
+		}
+
 		res.json({ message: "Profile updated" });
 	} catch (err) {
 		console.error("patchUser error:", err);

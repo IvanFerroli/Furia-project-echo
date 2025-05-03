@@ -2,43 +2,52 @@
 
 -- 🚀 USERS
 CREATE TABLE users (
-  id VARCHAR(255) PRIMARY KEY,
-  email VARCHAR(255),
-  nickname VARCHAR(100),
+  id VARCHAR(255) NOT NULL,
+  firebase_uid VARCHAR(128) NOT NULL,
+  email VARCHAR(255) DEFAULT NULL,
+  nickname VARCHAR(100) DEFAULT NULL,
   profile_image TEXT,
   bio TEXT,
-  city VARCHAR(100),
-  birthdate DATE,
-  cpf VARCHAR(14),
-  verified BOOLEAN DEFAULT FALSE,
-  profile_completed BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+  city VARCHAR(100) DEFAULT NULL,
+  birthdate DATE DEFAULT NULL,
+  cpf VARCHAR(14) DEFAULT NULL,
+  verified TINYINT(1) DEFAULT 0,
+  profile_completed TINYINT(1) DEFAULT 0,
+  created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  cep VARCHAR(20) DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- 💬 MESSAGES
 CREATE TABLE messages (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id VARCHAR(255),
-  nickname VARCHAR(100),
+  id INT NOT NULL AUTO_INCREMENT,
+  user_id VARCHAR(255) DEFAULT NULL,
+  nickname VARCHAR(100) DEFAULT NULL,
   text TEXT,
   timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
   likes INT DEFAULT 0,
   dislikes INT DEFAULT 0,
-  parent_id INT,
-  FOREIGN KEY (user_id) REFERENCES users(id)
-);
+  parent_id INT DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY messages_ibfk_1 (user_id),
+  CONSTRAINT messages_ibfk_1 FOREIGN KEY (user_id) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- 🏆 AWARDS
 CREATE TABLE awards (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id VARCHAR(255),
-  award_type VARCHAR(100),
-  awarded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id)
-);
+  id INT NOT NULL AUTO_INCREMENT,
+  user_id VARCHAR(255) DEFAULT NULL,
+  award_type VARCHAR(100) DEFAULT NULL,
+  awarded_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY awards_ibfk_1 (user_id),
+  CONSTRAINT awards_ibfk_1 FOREIGN KEY (user_id) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- 👑 ADMINS
 CREATE TABLE admins (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  email VARCHAR(255) NOT NULL UNIQUE
-);
+  id INT NOT NULL AUTO_INCREMENT,
+  email VARCHAR(255) NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

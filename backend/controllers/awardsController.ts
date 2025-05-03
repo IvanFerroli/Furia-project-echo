@@ -1,14 +1,15 @@
 import { Request, Response } from "express";
 import { getAwardsByUser, assignAward } from "../models/award";
 
-export const getUserAwards = async (req: Request, res: Response) => {
+export const getUserAwards = async (req: Request, res: Response): Promise<void> => {
 	try {
 		const userId = req.params.userId;
-		if (!userId)
-			return res.status(400).json({ message: "User ID is required" });
+		if (!userId) {
+			res.status(400).json({ message: "User ID is required" });
+			return;
+		}
 
 		const awards = await getAwardsByUser(userId);
-
 		res.json(awards);
 	} catch (err) {
 		console.error("getUserAwards error:", err);
@@ -16,13 +17,12 @@ export const getUserAwards = async (req: Request, res: Response) => {
 	}
 };
 
-export const postAward = async (req: Request, res: Response) => {
+export const postAward = async (req: Request, res: Response): Promise<void> => {
 	const { user_id, award_type } = req.body;
 
 	if (!user_id || !award_type) {
-		return res
-			.status(400)
-			.json({ message: "user_id and award_type are required" });
+		res.status(400).json({ message: "user_id and award_type are required" });
+		return;
 	}
 
 	try {
