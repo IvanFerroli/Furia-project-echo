@@ -106,7 +106,7 @@ export default function FanThreadChat() {
               hasTrophy={hasTrophy && msg.nickname === nick}
               onReact={handleReact}
             >
-              <details>
+              <details open={true}>
                 <summary className="cursor-pointer text-blue-600 hover:underline mt-2">
                   Responder / Ver respostas ({msg.replyCount || 0})
                 </summary>
@@ -168,6 +168,7 @@ export default function FanThreadChat() {
                   </div>
                 </div>
               </details>
+
             </MessageBubble>
           );
         })}
