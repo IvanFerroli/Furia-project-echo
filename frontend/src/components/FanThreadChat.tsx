@@ -1,29 +1,33 @@
 import { useEffect, useState } from 'react';
-import data from '../data/threadChatMock.json';
 import Picker from '@emoji-mart/react';
 import dataEmoji from '@emoji-mart/data';
-import { useAuth } from '../contexts/AuthContext'
-import { getUserProfile } from '../services/getUserProfile'
+import { useAuth } from '../contexts/AuthContext';
+import { getUserProfile } from '../services/getUserProfile';
+import { fetchMessages, sendMessage, reactToMessage } from '../services/messagesService';
 
-
-
-interface Message {
-  id: string;
-  author: string;
+export interface Message {
+  id: number;
+  user_id?: string;
+  nickname: string;
   text: string;
   timestamp: string;
   likes: number;
   dislikes: number;
-  replies: Message[];
+  parent_id?: number;
+  replyCount?: number;
 }
 
 export default function FanThreadChat() {
-  const [messages, setMessages] = useState<Message[]>([]);
   const { user } = useAuth();
-  const [nick, setNick] = useState<string>('');
+  const [nick, setNick] = useState('');
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const [replyInputs, setReplyInputs] = useState<Record<number, string>>({});
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showReplyEmoji, setShowReplyEmoji] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
-    const fetchNick = async () => {
+    const fetchData = async () => {
       if (!user?.uid) return;
       try {
         const profile = await getUserProfile(user.uid);
@@ -32,174 +36,150 @@ export default function FanThreadChat() {
         console.error('Erro ao buscar nickname:', err);
       }
     };
-    fetchNick();
+
+    const loadMessages = async () => {
+      try {
+        const data = await fetchMessages();
+        setMessages(data);
+      } catch (err) {
+        console.error('Erro ao buscar mensagens:', err);
+      }
+    };
+
+    fetchData();
+    loadMessages();
   }, [user]);
 
-  const [input, setInput] = useState<string>('');
-  const [replyInputs, setReplyInputs] = useState<Record<string, string>>({});
-  const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
-
-
-
-  useEffect(() => {
-    const storedMessages = localStorage.getItem('messages');
-    if (storedMessages) {
-      setMessages(JSON.parse(storedMessages));
-    } else {
-      setMessages(data as Message[]);
-      localStorage.setItem('messages', JSON.stringify(data));
+  const refreshMessages = async () => {
+    try {
+      const updated = await fetchMessages();
+      setMessages(updated);
+    } catch (err) {
+      console.error('Erro ao atualizar mensagens:', err);
     }
-  }, []);
-
-  const saveMessages = (updatedMessages: Message[]) => {
-    setMessages(updatedMessages);
-    localStorage.setItem('messages', JSON.stringify(updatedMessages));
   };
 
-  const handleSend = () => {
-    if (!nick || !input.trim()) return;
-
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      author: nick,
-      text: input,
-      timestamp: new Date().toISOString(),
-      likes: 0,
-      dislikes: 0,
-      replies: [],
-    };
-
-    saveMessages([newMessage, ...messages]);
-    setInput('');
+  const handleSend = async () => {
+    if (!nick || !input.trim() || !user?.uid) return;
+    try {
+      await sendMessage({ user_id: user.uid, nickname: nick, text: input });
+      await refreshMessages();
+      setInput('');
+    } catch (err) {
+      console.error('Erro ao enviar mensagem:', err);
+    }
   };
 
-  const handleSendReply = (parentId: string) => {
-    if (!nick || !replyInputs[parentId]?.trim()) return;
+  const handleSendReply = async (parentId: number) => {
+    const replyText = replyInputs[parentId];
+    if (!nick || !replyText?.trim() || !user?.uid) return;
 
-    const newReply: Message = {
-      id: Date.now().toString(),
-      author: nick,
-      text: replyInputs[parentId],
-      timestamp: new Date().toISOString(),
-      likes: 0,
-      dislikes: 0,
-      replies: [],
-    };
-
-    const updatedMessages = messages.map(msg => {
-      if (msg.id === parentId) {
-        return { ...msg, replies: [...msg.replies, newReply] };
-      }
-      return msg;
-    });
-
-    saveMessages(updatedMessages);
-    setReplyInputs(prev => ({ ...prev, [parentId]: '' }));
+    try {
+      await sendMessage({ user_id: user.uid, nickname: nick, text: replyText, parent_id: parentId });
+      await refreshMessages();
+      setReplyInputs((prev) => ({ ...prev, [parentId]: '' }));
+      setShowReplyEmoji((prev) => ({ ...prev, [parentId]: false }));
+    } catch (err) {
+      console.error('Erro ao enviar resposta:', err);
+    }
   };
 
-  const handleEmojiSelect = (emoji: { native: string }) => {
-    setInput(prev => prev + emoji.native);
-  };
-
-  const handleLike = (messageId: string, replyId?: string) => {
-    const updatedMessages = messages.map(msg => {
-      if (msg.id === messageId) {
-        if (replyId) {
-          const updatedReplies = msg.replies.map(rep => rep.id === replyId ? { ...rep, likes: rep.likes + 1 } : rep);
-          return { ...msg, replies: updatedReplies };
-        }
-        return { ...msg, likes: msg.likes + 1 };
-      }
-      return msg;
-    });
-    saveMessages(updatedMessages);
-  };
-
-  const handleDislike = (messageId: string, replyId?: string) => {
-    const updatedMessages = messages.map(msg => {
-      if (msg.id === messageId) {
-        if (replyId) {
-          const updatedReplies = msg.replies.map(rep => rep.id === replyId ? { ...rep, dislikes: rep.dislikes + 1 } : rep);
-          return { ...msg, replies: updatedReplies };
-        }
-        return { ...msg, dislikes: msg.dislikes + 1 };
-      }
-      return msg;
-    });
-    saveMessages(updatedMessages);
+  const handleReact = async (id: number, type: 'like' | 'dislike') => {
+    try {
+      await reactToMessage(String(id), type);
+      await refreshMessages();
+    } catch (err) {
+      console.error(`Erro ao reagir com ${type}:`, err);
+    }
   };
 
   return (
-    <div className="mt-[50px] mb-[100px] w-[90%] mx-auto rounded-[32px] bg-[#f9f9f9] shadow-xl flex flex-col max-h-[100vh]">
-
-
+    <div
+      className="mt-[50px] mb-[100px] w-[90%] mx-auto rounded-[32px] bg-[#f9f9f9] shadow-xl flex flex-col"
+      style={{ minHeight: '1000px' }}
+    >
       {nick && (
         <>
           <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-[#f9f9f9]">
-            {messages.map((msg) => (
-              <div key={msg.id} className="bg-[#fbfbfb] border-[1px] border-[#ffffff] rounded-3xl shadow-sm p-4 space-y-3 my-[6px]"
-              >
+            {messages.filter(m => !m.parent_id).map(msg => (
+              <div key={msg.id} className="bg-[#fbfbfb] border border-[#fff] rounded-3xl shadow-sm p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <strong className="text-gray-800">{msg.author}</strong>
+                  <strong>{msg.nickname}</strong>
                   <span className="text-xs text-gray-400">{new Date(msg.timestamp).toLocaleString()}</span>
                 </div>
-                <p className="text-gray-700">{msg.text}</p>
+                <p>{msg.text}</p>
                 <div className="flex gap-2 text-sm">
-                  <button onClick={() => handleLike(msg.id)} className="bg-gray-100 hover:bg-blue-100 text-gray-600 rounded-full px-3 py-1 shadow-sm">
-                    👍 {msg.likes}
-                  </button>
-                  <button onClick={() => handleDislike(msg.id)} className="bg-gray-100 hover:bg-red-100 text-gray-600 rounded-full px-3 py-1 shadow-sm">
-                    👎 {msg.dislikes}
-                  </button>
+                  <button onClick={() => handleReact(msg.id, 'like')}>👍 {msg.likes}</button>
+                  <button onClick={() => handleReact(msg.id, 'dislike')}>👎 {msg.dislikes}</button>
                 </div>
 
-                <details className="pt-2 text-sm">
+                <details>
                   <summary className="cursor-pointer text-blue-600 hover:underline">
-                    Responder / Ver respostas ({msg.replies.length})
+                    Responder / Ver respostas ({msg.replyCount || 0})
                   </summary>
                   <div className="mt-3 pl-4 border-l border-gray-200 space-y-3">
-                    {msg.replies.map((rep) => (
-                      <div key={rep.id} className="bg-[#fefefe] border border-[#ffffff] rounded-2xl p-3 shadow-sm">
+                    {messages.filter(r => r.parent_id === msg.id).map(rep => (
+                      <div key={rep.id} className="bg-white border rounded-2xl p-3 shadow-sm">
                         <div className="flex items-center justify-between">
-                          <strong className="text-gray-700">{rep.author}</strong>
+                          <strong>{rep.nickname}</strong>
                           <span className="text-xs text-gray-400">{new Date(rep.timestamp).toLocaleString()}</span>
                         </div>
-                        <p className="text-gray-700">{rep.text}</p>
+                        <p>{rep.text}</p>
                         <div className="flex gap-2 mt-1 text-xs">
-                          <button onClick={() => handleLike(msg.id, rep.id)} className="bg-white border border-[#f9f9f9] hover:bg-gray-100 text-gray-600 rounded-xl px-4 py-[6px] shadow-sm"
-                          >
-                            👍 {rep.likes}
-                          </button>
-                          <button onClick={() => handleDislike(msg.id, rep.id)} className="bg-white border border-[#f9f9f9] hover:bg-gray-100 text-gray-600 rounded-xl px-4 py-[6px] shadow-sm"
-                          >
-                            👎 {rep.dislikes}
-                          </button>
+                          <button onClick={() => handleReact(rep.id, 'like')}>👍 {rep.likes}</button>
+                          <button onClick={() => handleReact(rep.id, 'dislike')}>👎 {rep.dislikes}</button>
                         </div>
                       </div>
                     ))}
 
-                    <input
-                      className="border border-gray-300 rounded-lg p-2 w-full mt-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                      placeholder="Escreva uma resposta..."
-                      value={replyInputs[msg.id] || ''}
-                      onChange={(e) =>
-                        setReplyInputs((prev) => ({ ...prev, [msg.id]: e.target.value }))
-                      }
-                      onKeyDown={(e) => e.key === 'Enter' && handleSendReply(msg.id)}
-                    />
-                    <button
-                      className="bg-blue-500 hover:bg-blue-600 text-white w-full mt-2 py-2 rounded-lg text-sm"
-                      onClick={() => handleSendReply(msg.id)}
-                    >
-                      Enviar resposta
-                    </button>
+                    <div className="relative mt-2">
+                      <input
+                        className="border border-gray-300 rounded-lg p-2 w-full text-sm"
+                        placeholder="Escreva uma resposta..."
+                        value={replyInputs[msg.id] || ''}
+                        onChange={(e) =>
+                          setReplyInputs((prev) => ({ ...prev, [msg.id]: e.target.value }))
+                        }
+                        onKeyDown={(e) => e.key === 'Enter' && handleSendReply(msg.id)}
+                      />
+                      <div className="flex justify-end items-center mt-1 gap-2">
+                        <button
+                          onClick={() =>
+                            setShowReplyEmoji((prev) => ({ ...prev, [msg.id]: !prev[msg.id] }))
+                          }
+                          className="text-lg"
+                        >
+                          😊
+                        </button>
+                        <button
+                          className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded text-sm"
+                          onClick={() => handleSendReply(msg.id)}
+                        >
+                          Enviar resposta
+                        </button>
+                      </div>
+                      {showReplyEmoji[msg.id] && (
+                        <div className="absolute bottom-[100%] right-0 z-50">
+                          <Picker
+                            data={dataEmoji}
+                            onEmojiSelect={(emoji: any) =>
+                              setReplyInputs((prev) => ({
+                                ...prev,
+                                [msg.id]: (prev[msg.id] || '') + emoji.native,
+                              }))
+                            }
+                            theme="light"
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </details>
               </div>
             ))}
           </div>
 
-          <div className="p-4 bg-white border-t border-gray-200 relative shadow-inner rounded-b-[32px]">
+          <div className="p-4 bg-white border-t border-gray-200 relative rounded-b-[32px]">
             <div className="flex items-center gap-2">
               <input
                 className="flex-1 border border-gray-300 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -221,10 +201,8 @@ export default function FanThreadChat() {
                 Enviar
               </button>
             </div>
-
-
             {showEmojiPicker && (
-              <div className="absolute bottom-16 right-4 z-50">
+              <div className="absolute bottom-[100%] right-4 z-50">
                 <Picker data={dataEmoji} onEmojiSelect={handleEmojiSelect} theme="light" />
               </div>
             )}
@@ -233,6 +211,4 @@ export default function FanThreadChat() {
       )}
     </div>
   );
-
-
 }
