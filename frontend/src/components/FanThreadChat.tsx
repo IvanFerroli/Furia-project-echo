@@ -3,6 +3,7 @@ import Picker from '@emoji-mart/react';
 import dataEmoji from '@emoji-mart/data';
 import { useAuth } from '../contexts/AuthContext';
 import { getUserProfile } from '../services/getUserProfile';
+import { getUserAwards } from '../services/getUserAwards';
 import { fetchMessages, sendMessage, reactToMessage } from '../services/messagesService';
 
 export interface Message {
@@ -20,6 +21,8 @@ export interface Message {
 export default function FanThreadChat() {
   const { user } = useAuth();
   const [nick, setNick] = useState('');
+  const [avatar, setAvatar] = useState('');
+  const [hasTrophy, setHasTrophy] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [replyInputs, setReplyInputs] = useState<Record<number, string>>({});
@@ -32,8 +35,11 @@ export default function FanThreadChat() {
       try {
         const profile = await getUserProfile(user.uid);
         setNick(profile.nickname || '');
+        setAvatar(profile.profile_image || '/default-avatar.png');
+        const awards = await getUserAwards(user.uid);
+        setHasTrophy(awards.some(a => a.name === 'Verificado'));
       } catch (err) {
-        console.error('Erro ao buscar nickname:', err);
+        console.error('Erro ao carregar perfil:', err);
       }
     };
 
@@ -73,12 +79,11 @@ export default function FanThreadChat() {
   const handleSendReply = async (parentId: number) => {
     const replyText = replyInputs[parentId];
     if (!nick || !replyText?.trim() || !user?.uid) return;
-
     try {
       await sendMessage({ user_id: user.uid, nickname: nick, text: replyText, parent_id: parentId });
       await refreshMessages();
-      setReplyInputs((prev) => ({ ...prev, [parentId]: '' }));
-      setShowReplyEmoji((prev) => ({ ...prev, [parentId]: false }));
+      setReplyInputs(prev => ({ ...prev, [parentId]: '' }));
+      setShowReplyEmoji(prev => ({ ...prev, [parentId]: false }));
     } catch (err) {
       console.error('Erro ao enviar resposta:', err);
     }
@@ -94,94 +99,105 @@ export default function FanThreadChat() {
   };
 
   const handleEmojiSelect = (emoji: any) => {
-    setInput((prev) => prev + emoji.native);
+    setInput(prev => prev + emoji.native);
   };
 
   return (
-    <div
-      className="mt-[50px] mb-[100px] w-[90%] mx-auto rounded-[32px] bg-[#f9f9f9] shadow-xl flex flex-col"
-      style={{ minHeight: '1000px' }}
-    >
+    <div className="mt-[50px] mb-[100px] w-[90%] mx-auto rounded-[32px] bg-[#f9f9f9] shadow-xl flex flex-col" style={{ minHeight: '1000px' }}>
       {nick && (
         <>
-          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-[#f9f9f9]">
-            {messages.filter(m => !m.parent_id).map(msg => (
-              <div key={msg.id} className="bg-[#fbfbfb] border border-[#fff] rounded-3xl shadow-sm p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <strong>{msg.nickname}</strong>
-                  <span className="text-xs text-gray-400">{new Date(msg.timestamp).toLocaleString()}</span>
-                </div>
-                <p>{msg.text}</p>
-                <div className="flex gap-2 text-sm">
-                  <button onClick={() => handleReact(msg.id, 'like')}>👍 {msg.likes}</button>
-                  <button onClick={() => handleReact(msg.id, 'dislike')}>👎 {msg.dislikes}</button>
-                </div>
-
-                <details>
-                  <summary className="cursor-pointer text-blue-600 hover:underline">
-                    Responder / Ver respostas ({msg.replyCount || 0})
-                  </summary>
-                  <div className="mt-3 pl-4 border-l border-gray-200 space-y-3">
-                    {messages.filter(r => r.parent_id === msg.id).map(rep => (
-                      <div key={rep.id} className="bg-white border rounded-2xl p-3 shadow-sm">
-                        <div className="flex items-center justify-between">
-                          <strong>{rep.nickname}</strong>
-                          <span className="text-xs text-gray-400">{new Date(rep.timestamp).toLocaleString()}</span>
-                        </div>
-                        <p>{rep.text}</p>
-                        <div className="flex gap-2 mt-1 text-xs">
-                          <button onClick={() => handleReact(rep.id, 'like')}>👍 {rep.likes}</button>
-                          <button onClick={() => handleReact(rep.id, 'dislike')}>👎 {rep.dislikes}</button>
-                        </div>
-                      </div>
-                    ))}
-
-                    <div className="relative mt-2">
-                      <input
-                        className="border border-gray-300 rounded-lg p-2 w-full text-sm"
-                        placeholder="Escreva uma resposta..."
-                        value={replyInputs[msg.id] || ''}
-                        onChange={(e) =>
-                          setReplyInputs((prev) => ({ ...prev, [msg.id]: e.target.value }))
-                        }
-                        onKeyDown={(e) => e.key === 'Enter' && handleSendReply(msg.id)}
+          <div className="flex-1 px-4 py-4 space-y-4 overflow-y-scroll bg-[#f9f9f9]" style={{ maxHeight: '700px' }}>
+            {messages.filter(m => !m.parent_id).map(msg => {
+              const isMine = user?.uid && msg.user_id === user.uid;
+              return (
+                <div key={msg.id} className={`flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
+                  <div className={`max-w-[70%] p-4 rounded-2xl shadow-sm ${isMine ? 'bg-blue-500 text-white' : 'bg-gray-100 text-black'}`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <img
+                        src={isMine ? avatar : '/default-avatar.png'}
+                        alt="Avatar"
+                        className="w-6 h-6 rounded-full object-cover"
                       />
-                      <div className="flex justify-end items-center mt-1 gap-2">
-                        <button
-                          onClick={() =>
-                            setShowReplyEmoji((prev) => ({ ...prev, [msg.id]: !prev[msg.id] }))
-                          }
-                          className="text-lg"
-                        >
-                          😊
-                        </button>
-                        <button
-                          className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded text-sm"
-                          onClick={() => handleSendReply(msg.id)}
-                        >
-                          Enviar resposta
-                        </button>
-                      </div>
-                      {showReplyEmoji[msg.id] && (
-                        <div className="absolute bottom-[100%] right-0 z-50">
-                          <Picker
-                            data={dataEmoji}
-                            onEmojiSelect={(emoji: any) =>
-                              setReplyInputs((prev) => ({
-                                ...prev,
-                                [msg.id]: (prev[msg.id] || '') + emoji.native,
-                              }))
-                            }
-                            theme="light"
-                          />
-                        </div>
-                      )}
+                      <strong>
+                        {msg.nickname}
+                        {msg.nickname === nick && hasTrophy && ' 🏆'}
+                      </strong>
+                      <span className="text-xs text-gray-300">{new Date(msg.timestamp).toLocaleString()}</span>
                     </div>
+                    <p className="whitespace-pre-wrap">{msg.text}</p>
+                    <div className="flex gap-2 text-sm mt-2">
+                      <button onClick={() => handleReact(msg.id, 'like')}>👍 {msg.likes}</button>
+                      <button onClick={() => handleReact(msg.id, 'dislike')}>👎 {msg.dislikes}</button>
+                    </div>
+
+                    <details>
+                      <summary className="cursor-pointer text-blue-600 hover:underline mt-2">
+                        Responder / Ver respostas ({msg.replyCount || 0})
+                      </summary>
+                      <div className="mt-3 pl-4 border-l border-gray-200 space-y-3">
+                        {messages.filter(r => r.parent_id === msg.id).map(rep => (
+                          <div key={rep.id} className="bg-white border rounded-2xl p-3 shadow-sm">
+                            <div className="flex items-center justify-between">
+                              <strong>{rep.nickname}</strong>
+                              <span className="text-xs text-gray-400">{new Date(rep.timestamp).toLocaleString()}</span>
+                            </div>
+                            <p>{rep.text}</p>
+                            <div className="flex gap-2 mt-1 text-xs">
+                              <button onClick={() => handleReact(rep.id, 'like')}>👍 {rep.likes}</button>
+                              <button onClick={() => handleReact(rep.id, 'dislike')}>👎 {rep.dislikes}</button>
+                            </div>
+                          </div>
+                        ))}
+
+                        <div className="relative mt-2">
+                          <input
+                            className="border border-gray-300 rounded-lg p-2 w-full text-sm"
+                            placeholder="Escreva uma resposta..."
+                            value={replyInputs[msg.id] || ''}
+                            onChange={(e) =>
+                              setReplyInputs((prev) => ({ ...prev, [msg.id]: e.target.value }))
+                            }
+                            onKeyDown={(e) => e.key === 'Enter' && handleSendReply(msg.id)}
+                          />
+                          <div className="flex justify-end items-center mt-1 gap-2">
+                            <button
+                              onClick={() =>
+                                setShowReplyEmoji((prev) => ({ ...prev, [msg.id]: !prev[msg.id] }))
+                              }
+                              className="text-lg"
+                            >
+                              😊
+                            </button>
+                            <button
+                              className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded text-sm"
+                              onClick={() => handleSendReply(msg.id)}
+                            >
+                              Enviar resposta
+                            </button>
+                          </div>
+                          {showReplyEmoji[msg.id] && (
+                            <div className="absolute bottom-[100%] right-0 z-50">
+                              <Picker
+                                data={dataEmoji}
+                                onEmojiSelect={(emoji: any) =>
+                                  setReplyInputs((prev) => ({
+                                    ...prev,
+                                    [msg.id]: (prev[msg.id] || '') + emoji.native,
+                                  }))
+                                }
+                                theme="light"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </details>
                   </div>
-                </details>
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </div>
+
           <div className="p-4 bg-white border-t border-gray-200 relative rounded-b-[32px]">
             <div className="flex items-center gap-2">
               <input
@@ -213,7 +229,6 @@ export default function FanThreadChat() {
                 />
               </div>
             )}
-
           </div>
         </>
       )}
