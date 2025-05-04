@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import data from '../data/threadChatMock.json';
 import Picker from '@emoji-mart/react';
 import dataEmoji from '@emoji-mart/data';
+import { useAuth } from '../contexts/AuthContext'
+import { getUserProfile } from '../services/getUserProfile'
+
 
 
 interface Message {
@@ -16,8 +19,22 @@ interface Message {
 
 export default function FanThreadChat() {
   const [messages, setMessages] = useState<Message[]>([]);
+  const { user } = useAuth();
   const [nick, setNick] = useState<string>('');
-  const [nickInput, setNickInput] = useState<string>(''); // 👈 FALTAVA ESSE AQUI
+
+  useEffect(() => {
+    const fetchNick = async () => {
+      if (!user?.uid) return;
+      try {
+        const profile = await getUserProfile(user.uid);
+        setNick(profile.nickname || '');
+      } catch (err) {
+        console.error('Erro ao buscar nickname:', err);
+      }
+    };
+    fetchNick();
+  }, [user]);
+
   const [input, setInput] = useState<string>('');
   const [replyInputs, setReplyInputs] = useState<Record<string, string>>({});
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
@@ -114,23 +131,6 @@ export default function FanThreadChat() {
 
   return (
     <div className="mt-[50px] mb-[100px] w-[90%] mx-auto rounded-[32px] bg-[#f9f9f9] shadow-xl flex flex-col max-h-[100vh]">
-      {!nick && (
-        <div className="p-4 bg-white rounded-t-[32px] shadow-md space-y-2">
-          <input
-            className="border border-gray-300 p-3 w-full rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
-            placeholder="Escolha um nick para participar"
-            value={nickInput}
-            onChange={(e) => setNickInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && nickInput.trim() && setNick(nickInput.trim())}
-          />
-          <button
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl w-full"
-            onClick={() => nickInput.trim() && setNick(nickInput.trim())}
-          >
-            Entrar no chat
-          </button>
-        </div>
-      )}
 
 
       {nick && (
