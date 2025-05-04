@@ -38,6 +38,23 @@ export default function ProfileDashboard() {
     const totalPosts = metrics?.userRanking?.reduce((sum, u) => sum + u.messages, 0) ?? 0;
     const totalLikes = metrics?.userRanking?.reduce((sum, u) => sum + Number(u.total_likes), 0) ?? 0;
     const topLikes = metrics?.mostLiked?.likes ?? 0;
+    const streakData = (metrics?.streak ?? [])
+        .map(({ date, count }) => {
+            const d = new Date(date);
+            return {
+                raw: d.getTime(),
+                date: `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`,
+                streak: count,
+            };
+        })
+        .sort((a, b) => a.raw - b.raw)
+        .map(({ date, streak }) => ({ date, streak }));
+
+
+    console.log("🔥 RAW metrics.streak:", metrics?.streak);
+    console.log("📈 streakData formatado:", streakData);
+
+
 
     return (
         <div
@@ -63,11 +80,21 @@ export default function ProfileDashboard() {
 
                     <div className="w-full flex flex-col items-center">
                         <ResponsiveContainer width="90%" height={250}>
-                            <AreaChart data={[]}> {/* Futuro: integrar com dados reais de atividade */}
-                                <XAxis dataKey="date" stroke="#fff" />
+                            <AreaChart data={streakData}>
+                                <XAxis
+                                    dataKey="date"
+                                    stroke="#fff"
+                                />
                                 <YAxis stroke="#fff" />
-                                <Tooltip />
-                                <Area type="monotone" dataKey="streak" stroke="#4ade80" fill="#4ade80" />
+                                <Tooltip
+                                    labelFormatter={(label: string) => `Dia: ${label}`}
+                                />
+                                <Area
+                                    type="monotone"
+                                    dataKey="streak"
+                                    stroke="#4ade80"
+                                    fill="#4ade80"
+                                />
                             </AreaChart>
                         </ResponsiveContainer>
                         <p className="text-lg text-[#4ade80] mt-2">Streak de Atividade</p>

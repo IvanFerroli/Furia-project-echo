@@ -10,8 +10,11 @@
     "resolveJsonModule": true,                     // ✅ importa arquivos .json direto
     "outDir": "./dist",                            // 📁 saída separada
     "rootDir": "./",                               // 📁 entrada é a raiz do backend
-    "isolatedModules": true                        // 🧱 obriga modularização segura
+    "isolatedModules": true,                       // 🧱 obriga modularização segura
+    "noImplicitAny": true,
+
   },
   "include": ["./**/*.ts"],
   "exclude": ["node_modules", "dist"]
+  
 }

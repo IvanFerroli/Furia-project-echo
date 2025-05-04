@@ -1,17 +1,19 @@
 import { Request, Response } from 'express';
-import { getDashboardMetrics } from '../models/message';
+import { getDashboardMetrics, getActivityStreak } from '../models/message';
 import { getUserDemographics } from '../models/user';
 
 export const getDashboard = async (_req: Request, res: Response): Promise<void> => {
   try {
-    const [metrics, demographics] = await Promise.all([
+    const [metrics, demographics, streak] = await Promise.all([
       getDashboardMetrics(),
       getUserDemographics(),
+      getActivityStreak(),
     ]);
 
     res.json({
       ...metrics,
       demographics,
+      streak,
     });
   } catch (err) {
     console.error('Erro ao obter métricas do dashboard:', err);
