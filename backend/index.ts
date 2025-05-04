@@ -6,6 +6,7 @@ import adminRoutes from './routes/admin'
 import userRoutes from './routes/users'
 import awardsRoutes from './routes/awards'
 import messagesRoutes from './routes/messages'
+import metricsRoutes from './routes/metrics'
 
 dotenv.config()
 
@@ -25,6 +26,8 @@ app.use('/admin', adminRoutes)
 app.use('/users', userRoutes)
 app.use('/awards', awardsRoutes)
 app.use('/messages', messagesRoutes)
+app.use('/metrics', metricsRoutes)
+
 
 app.get('/', (req, res) => {
   res.send('FURIA Fan Chat API running 🟢')

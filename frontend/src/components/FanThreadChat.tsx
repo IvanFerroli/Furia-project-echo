@@ -93,6 +93,10 @@ export default function FanThreadChat() {
     }
   };
 
+  const handleEmojiSelect = (emoji: any) => {
+    setInput((prev) => prev + emoji.native);
+  };
+
   return (
     <div
       className="mt-[50px] mb-[100px] w-[90%] mx-auto rounded-[32px] bg-[#f9f9f9] shadow-xl flex flex-col"
@@ -178,7 +182,6 @@ export default function FanThreadChat() {
               </div>
             ))}
           </div>
-
           <div className="p-4 bg-white border-t border-gray-200 relative rounded-b-[32px]">
             <div className="flex items-center gap-2">
               <input
@@ -203,9 +206,14 @@ export default function FanThreadChat() {
             </div>
             {showEmojiPicker && (
               <div className="absolute bottom-[100%] right-4 z-50">
-                <Picker data={dataEmoji} onEmojiSelect={handleEmojiSelect} theme="light" />
+                <Picker
+                  data={dataEmoji}
+                  onEmojiSelect={handleEmojiSelect}
+                  theme="light"
+                />
               </div>
             )}
+
           </div>
         </>
       )}
