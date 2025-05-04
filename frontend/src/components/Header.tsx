@@ -60,7 +60,6 @@ export default function Header() {
           <img src="/furia-logo.svg" alt="FURIA Logo" style={{ height: '28px' }} />
         </div>
 
-
         {/* Right icons */}
         <div style={{
           display: 'flex',
@@ -71,42 +70,47 @@ export default function Header() {
         }}>
           <FaSearch size={16} color="black" style={{ cursor: 'pointer' }} />
 
-          {/* Avatar com hover menu */}
+          {/* Avatar com hover menu mais suave */}
           <div
             style={{ position: 'relative', display: 'inline-block' }}
             onMouseEnter={() => setShowMenu(true)}
             onMouseLeave={() => setShowMenu(false)}
-            onClick={handleLoginClick}
           >
-            {user?.photoURL ? (
-              <img
-                src={user.photoURL}
-                alt="Avatar"
-                style={{
-                  height: '22px',
-                  width: '22px',
-                  borderRadius: '50%',
-                  cursor: 'pointer',
-                  objectFit: 'cover',
-                }}
-              />
-            ) : (
-              <FaUser size={16} color="black" style={{ cursor: 'pointer' }} />
-            )}
+            <div onClick={handleLoginClick}>
+              {user?.photoURL ? (
+                <img
+                  src={user.photoURL}
+                  alt="Avatar"
+                  style={{
+                    height: '22px',
+                    width: '22px',
+                    borderRadius: '50%',
+                    cursor: 'pointer',
+                    objectFit: 'cover',
+                  }}
+                />
+              ) : (
+                <FaUser size={16} color="black" style={{ cursor: 'pointer' }} />
+              )}
+            </div>
 
+            {/* Menu com margem negativa pra colar no ícone */}
             {user && showMenu && (
               <div
                 style={{
                   position: 'absolute',
                   top: '24px',
                   right: 0,
+                  left: -60, // 👈 joga pra fora da caixa
                   backgroundColor: 'white',
                   border: '1px solid #ddd',
                   borderRadius: '6px',
                   boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
                   zIndex: 999,
                   padding: '8px',
-                  width: '120px',
+                  width: '140px', // 👈 aumentou pra direita
+                  marginTop: '-2px',
+                  paddingBottom: '12px', // 👈 mais tolerância no mouseLeave
                 }}
               >
                 <button
@@ -139,7 +143,9 @@ export default function Header() {
                 </button>
               </div>
             )}
+
           </div>
+
 
           <div>
             <a href="https://furia.gg" target="_blank" rel="noopener noreferrer">
@@ -150,4 +156,5 @@ export default function Header() {
       </div>
     </header>
   );
+
 }
