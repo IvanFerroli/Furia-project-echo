@@ -93,8 +93,14 @@ export default function ProfileDashboard() {
                     <ChartCard title="Faixa Etária">
                         <ResponsiveContainer width="100%" height={200}>
                             <PieChart>
-                                <Pie data={[]} dataKey="value" nameKey="name" outerRadius={70} label>
-                                    {[].map((_, i) => (
+                                <Pie
+                                    data={metrics?.demographics?.ageGroups ?? []}
+                                    dataKey="value"
+                                    nameKey="name"
+                                    outerRadius={70}
+                                    label
+                                >
+                                    {(metrics?.demographics?.ageGroups ?? []).map((_, i) => (
                                         <Cell key={i} fill={COLORS[i % COLORS.length]} />
                                     ))}
                                 </Pie>
@@ -106,8 +112,14 @@ export default function ProfileDashboard() {
                     <ChartCard title="Distribuição por Estado">
                         <ResponsiveContainer width="100%" height={200}>
                             <PieChart>
-                                <Pie data={[]} dataKey="value" nameKey="name" outerRadius={70} label>
-                                    {[].map((_, i) => (
+                                <Pie
+                                    data={metrics?.demographics?.states ?? []}
+                                    dataKey="value"
+                                    nameKey="name"
+                                    outerRadius={70}
+                                    label
+                                >
+                                    {(metrics?.demographics?.states ?? []).map((_, i) => (
                                         <Cell key={i} fill={COLORS[i % COLORS.length]} />
                                     ))}
                                 </Pie>
@@ -115,6 +127,7 @@ export default function ProfileDashboard() {
                             </PieChart>
                         </ResponsiveContainer>
                     </ChartCard>
+
                 </div>
             </div>
 

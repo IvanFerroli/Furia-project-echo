@@ -1,4 +1,47 @@
 import db from "../db";
+import { RowDataPacket } from 'mysql2';
+
+export async function getUserDemographics(): Promise<{
+    ageGroups: { name: string; value: number }[];
+    states: { name: string; value: number }[];
+  }> {
+    const [rows]: [RowDataPacket[], any] = await db.query(`
+      SELECT 
+        TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) AS age,
+        city
+      FROM users
+      WHERE birthdate IS NOT NULL AND city IS NOT NULL
+    `);
+
+    const ageGroups: Record<string, number> = {
+      'Até 18': 0,
+      '19-25': 0,
+      '26-35': 0,
+      '36-50': 0,
+      '50+': 0,
+    };
+
+    const stateCounts: Record<string, number> = {};
+
+    for (const { age, city } of rows) {
+      // 🎂 Faixa etária
+      if (age <= 18) ageGroups['Até 18']++;
+      else if (age <= 25) ageGroups['19-25']++;
+      else if (age <= 35) ageGroups['26-35']++;
+      else if (age <= 50) ageGroups['36-50']++;
+      else ageGroups['50+']++;
+
+      // 🗺️ Estado (extraído do final do campo "cidade - UF")
+      const stateMatch = typeof city === 'string' ? city.match(/-\s*(\w{2})$/) : null;
+      const uf = stateMatch?.[1] || 'Desconhecido';
+      stateCounts[uf] = (stateCounts[uf] || 0) + 1;
+    }
+
+    return {
+      ageGroups: Object.entries(ageGroups).map(([name, value]) => ({ name, value })),
+      states: Object.entries(stateCounts).map(([name, value]) => ({ name, value })),
+    };
+}
 
 export async function getUserById(id: string) {
 	const [rows] = await db.query<any[]>("SELECT * FROM users WHERE id = ?", [id]);
