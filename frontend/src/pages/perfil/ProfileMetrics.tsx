@@ -4,83 +4,75 @@ import { getUserMetrics } from '../../services/getUserMetrics'
 import { UserMetrics } from '../../types/UserMetrics'
 
 export default function ProfileMetrics() {
-  const { user } = useAuth()
-  const [metrics, setMetrics] = useState<UserMetrics | null>(null)
+    const { user } = useAuth()
+    const [metrics, setMetrics] = useState<UserMetrics | null>(null)
 
-  useEffect(() => {
-    const fetchMetrics = async () => {
-      if (!user) return
-      try {
-        const data = await getUserMetrics(user.uid)
-        setMetrics(data)
-      } catch (err) {
-        console.error('Erro ao buscar métricas:', err)
-      }
-    }
+    useEffect(() => {
+        const fetchMetrics = async () => {
+            if (!user) return
+            try {
+                const data = await getUserMetrics(user.uid)
+                setMetrics(data)
+            } catch (err) {
+                console.error('Erro ao buscar métricas:', err)
+            }
+        }
 
-    fetchMetrics()
-  }, [user])
+        fetchMetrics()
+    }, [user])
 
-  if (!metrics) return null
+    if (!metrics) return null
 
-  return (
-    <div
-      className="pt-[100px] w-[90%] max-w-5xl mx-auto bg-white flex flex-col gap-16 rounded-xl shadow-md px-10 py-14"
-      style={{ fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif' }}
-    >
-      {/* Cabeçalho */}
-      <div className="space-y-3">
-        <h1 className="text-2xl font-semibold text-zinc-800">Métricas do Chat</h1>
-        <p className="text-sm text-zinc-500">
-          Acompanhe seu desempenho e participação na comunidade FURIA.
-        </p>
-      </div>
+    return (
+        <div
+            className="min-h-screen pt-[100px] px-6 pb-20 bg-white"
+            style={{ fontFamily: 'Helvetica World, Arial, Helvetica, sans-serif' }}
+        >
+            <div className="w-full max-w-6xl mx-auto text-center mb-12">
+                <h1 className="text-3xl font-bold text-[#0f172a]">Métricas do Chat</h1>
+                <p className="text-md text-[#475569] mt-2">
+                    Acompanhe seu desempenho e participação na comunidade FURIA.
+                </p>
+            </div>
 
-      {/* Conteúdo */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 text-[14px] text-[#333]">
-        <div>
-          <p className="font-semibold mb-1">Total de Posts</p>
-          <p>{metrics.totalPosts}</p>
-        </div>
-        <div>
-          <p className="font-semibold mb-1">Likes Recebidos</p>
-          <p>{metrics.totalLikes}</p>
-        </div>
-        <div>
-          <p className="font-semibold mb-1">Post com Mais Curtidas</p>
-          <p>{metrics.topPost || '—'}</p>
-        </div>
-        <div>
-          <p className="font-semibold mb-1">Maior Streak</p>
-          <p>{metrics.longestStreak} dias consecutivos postando</p>
-        </div>
-        <div>
-          <p className="font-semibold mb-1">Dias Ativos</p>
-          <p>{metrics.activeDays}</p>
-        </div>
-        <div>
-          <p className="font-semibold mb-1">Data de Criação</p>
-          <p>{new Date(metrics.createdAt).toLocaleDateString('pt-BR')}</p>
-        </div>
-        <div>
-          <p className="font-semibold mb-1">Total de Premiações</p>
-          <p>{metrics.awardsCount}</p>
-        </div>
-      </div>
+            {/* Caixa scrollável com métricas */}
+            <div
+                className="bg-white rounded-2xl shadow-lg max-w-6xl mx-auto p-6 w-[95%] overflow-y-auto"
+                style={{ maxHeight: '500px', marginTop: '30px' }}
+            >
+                <div
+                    style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        justifyContent: 'space-between',
+                        maxWidth: '95%',
+                        maxHeight: '600px',
+                        overflowY: 'auto',
+                        margin: '0 auto',
+                        paddingLeft: '10px',
+                    }}
+                >
 
-      {/* Barra de progresso */}
-      <div>
-        <p className="font-semibold text-sm mb-1">Progresso do Perfil</p>
-        <div className="h-2 bg-zinc-200 rounded-full overflow-hidden">
-          <div
-            className="h-2 bg-green-500 transition-all duration-300"
-            style={{ width: `${metrics.profileCompletion}%` }}
-          ></div>
+
+                    <MetricBox label="Total de Posts" value={metrics.totalPosts} />
+                    <MetricBox label="Likes Recebidos" value={metrics.totalLikes} />
+                    <MetricBox label="Post com Mais Curtidas" value={metrics.topPost || 'Nenhuma mensagem encontrada'} />
+                    <MetricBox label="Maior Streak" value={`${metrics.longestStreak} dias consecutivos`} />
+                    <MetricBox label="Dias Ativos" value={metrics.activeDays} />
+                    <MetricBox label="Data de Criação" value={new Date(metrics.createdAt).toLocaleDateString('pt-BR')} />
+                    <MetricBox label="Total de Premiações" value={metrics.awardsCount} />
+                    <MetricBox label="Perfil Completo" value={`${metrics.profileCompletion}%`} />
+                </div>
+            </div>
         </div>
-        <p className="text-xs text-right mt-1 text-zinc-500">
-          {metrics.profileCompletion}% completo
-        </p>
-      </div>
-    </div>
-  )
+    )
+}
+
+function MetricBox({ label, value }: { label: string; value: string | number }) {
+    return (
+        <div className="bg-[#111827] text-[#f3f4f6] rounded-[2rem] shadow-[0_15px_35px_rgba(0,0,0,0.5)] w-[48%] h-[110px] flex flex-col items-center justify-center transition-all duration-300 hover:scale-[1.03] text-center mb-[20px] p-3">
+            <p className="text-[22px] font-extrabold leading-tight text-[#a855f7]">{value}</p>
+            <p className="text-sm font-medium mt-1 text-[#c084fc]">{label}</p>
+        </div>
+    )
 }
