@@ -1,5 +1,11 @@
 import db from "../db";
 import { RowDataPacket, ResultSetHeader } from "mysql2";
+import {
+	DashboardMetrics,
+	DashboardPost,
+	DashboardHashtag,
+	DashboardUserRanking,
+} from "../types/dashboardTypes";
 
 export async function getAllMessages() {
 	const [rows]: [RowDataPacket[], any] = await db.query(`
@@ -38,39 +44,62 @@ export async function reactToMessage(id: string, type: "like" | "dislike") {
 	);
 }
 
-export async function getDashboardMetrics() {
-	const [posts]: [RowDataPacket[], any] = await db.query("SELECT * FROM messages");
-	const [users]: [RowDataPacket[], any] = await db.query("SELECT COUNT(*) as total FROM users");
+export async function getDashboardMetrics(): Promise<DashboardMetrics> {
+	const [posts]: [RowDataPacket[], any] = await db.query(`
+    SELECT * FROM messages
+  `);
 
-	const hashtags: Record<string, number> = {};
-	let totalLikes = 0;
-	let topLikes = 0;
+	const [userStats]: [RowDataPacket[], any] = await db.query(`
+    SELECT 
+      u.id AS user_id,
+      u.nickname,
+      COUNT(m.id) AS messages,
+      SUM(m.likes) AS total_likes,
+      SUM(m.dislikes) AS total_dislikes
+    FROM users u
+    LEFT JOIN messages m ON m.user_id = u.id
+    GROUP BY u.id, u.nickname
+    ORDER BY total_likes DESC
+  `);
+
+	let mostLiked: DashboardPost | null = null;
+	let mostDisliked: DashboardPost | null = null;
+	const hashtagsMap: Record<string, number> = {};
 	const streakMap: Record<string, number> = {};
 
 	for (const post of posts) {
-		// Hashtags
-		const matches = post.text.match(/#[\wÀ-ú]+/g);
-		if (matches) {
-			for (const tag of matches) {
-				hashtags[tag] = (hashtags[tag] || 0) + 1;
+		if (!mostLiked || post.likes > mostLiked.likes) mostLiked = post;
+		if (!mostDisliked || post.dislikes > mostDisliked.dislikes) mostDisliked = post;
+
+		const foundTags = post.text?.match(/#[\wÀ-ú]+/g);
+		if (foundTags) {
+			for (const tag of foundTags) {
+				hashtagsMap[tag] = (hashtagsMap[tag] || 0) + 1;
 			}
 		}
 
-		// Likes
-		totalLikes += post.likes;
-		if (post.likes > topLikes) topLikes = post.likes;
-
-		// Streak
 		const date = new Date(post.timestamp).toISOString().split("T")[0];
 		streakMap[date] = (streakMap[date] || 0) + 1;
 	}
 
+	const topHashtags: DashboardHashtag[] = Object.entries(hashtagsMap)
+		.map(([tag, count]) => ({ tag, count }))
+		.sort((a, b) => b.count - a.count)
+		.slice(0, 10);
+
+	const userRanking = userStats.map((u) => ({
+		user_id: u.user_id,
+		nickname: u.nickname,
+		messages: u.messages,
+		total_likes: u.total_likes,
+		total_dislikes: u.total_dislikes,
+	})) satisfies DashboardUserRanking[];
+
 	return {
-		hashtags,
-		streak: streakMap,
-		totalUsers: users[0].total,
-		totalPosts: posts.length,
-		totalLikes,
-		topLikes,
+		mostLiked,
+		mostDisliked,
+		topHashtags,
+		userRanking,
 	};
 }
+
