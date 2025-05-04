@@ -36,7 +36,7 @@ export default function ProfileDashboard() {
     const hashtags = metrics?.topHashtags?.map(h => ({ name: h.tag, value: h.count })) ?? [];
     const totalUsers = metrics?.userRanking?.length ?? 0;
     const totalPosts = metrics?.userRanking?.reduce((sum, u) => sum + u.messages, 0) ?? 0;
-    const totalLikes = metrics?.userRanking?.reduce((sum, u) => sum + u.total_likes, 0) ?? 0;
+    const totalLikes = metrics?.userRanking?.reduce((sum, u) => sum + Number(u.total_likes), 0) ?? 0;
     const topLikes = metrics?.mostLiked?.likes ?? 0;
 
     return (
