@@ -6,7 +6,7 @@ import { getUserProfile } from '../services/getUserProfile';
 import { getUserAwards } from '../services/getUserAwards';
 import { fetchMessages, sendMessage, reactToMessage } from '../services/messagesService';
 import MessageBubble from '../components/MessageBubble';
-import { Message } from '../types/Message'; 
+import { Message } from '../types/Message';
 import ReplyBubble from '../components/ReplyBubble';
 
 export default function FanThreadChat() {
@@ -109,13 +109,22 @@ export default function FanThreadChat() {
             >
               <ReplyBubble
                 parentMessage={msg}
-                replies={messages.filter(r => r.parent_id === msg.id)}
+                replies={messages.filter((r) => r.parent_id === msg.id)}
                 user={user}
                 nick={nick}
                 avatar={avatar}
-                onSendReply={handleSendReply}
+                replyValue={replyInputs[msg.id] || ''}
+                onChange={(value) =>
+                  setReplyInputs((prev) => ({ ...prev, [msg.id]: value }))
+                }
+                onSendReply={() => handleSendReply(msg.id)}
                 onReact={handleReact}
+                showEmoji={!!showReplyEmoji[msg.id]}
+                toggleEmoji={() =>
+                  setShowReplyEmoji((prev) => ({ ...prev, [msg.id]: !prev[msg.id] }))
+                }
               />
+
 
 
             </MessageBubble>
