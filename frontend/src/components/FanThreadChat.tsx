@@ -6,7 +6,8 @@ import { getUserProfile } from '../services/getUserProfile';
 import { getUserAwards } from '../services/getUserAwards';
 import { fetchMessages, sendMessage, reactToMessage } from '../services/messagesService';
 import MessageBubble from '../components/MessageBubble';
-import { Message } from '../types/Message'; // ajustar caminho se necessário
+import { Message } from '../types/Message'; 
+import ReplyBubble from '../components/ReplyBubble';
 
 export default function FanThreadChat() {
   const { user } = useAuth();
@@ -106,68 +107,16 @@ export default function FanThreadChat() {
               hasTrophy={hasTrophy && msg.nickname === nick}
               onReact={handleReact}
             >
-              <details open={true}>
-                <summary className="cursor-pointer text-blue-600 hover:underline mt-2">
-                  Responder / Ver respostas ({msg.replyCount || 0})
-                </summary>
-                <div className="mt-3 pl-4 border-l border-gray-200 space-y-3">
-                  {messages.filter(r => r.parent_id === msg.id).map(rep => (
-                    <div key={rep.id} className="bg-white border rounded-2xl p-3 shadow-sm">
-                      <div className="flex items-center justify-between">
-                        <strong>{rep.nickname}</strong>
-                        <span className="text-xs text-gray-400">{new Date(rep.timestamp).toLocaleString()}</span>
-                      </div>
-                      <p>{rep.text}</p>
-                      <div className="flex gap-2 mt-1 text-xs">
-                        <button onClick={() => handleReact(rep.id, 'like')}>👍 {rep.likes}</button>
-                        <button onClick={() => handleReact(rep.id, 'dislike')}>👎 {rep.dislikes}</button>
-                      </div>
-                    </div>
-                  ))}
+              <ReplyBubble
+                parentMessage={msg}
+                replies={messages.filter(r => r.parent_id === msg.id)}
+                user={user}
+                nick={nick}
+                avatar={avatar}
+                onSendReply={handleSendReply}
+                onReact={handleReact}
+              />
 
-                  <div className="relative mt-2">
-                    <input
-                      className="border border-gray-300 rounded-lg p-2 w-full text-sm"
-                      placeholder="Escreva uma resposta..."
-                      value={replyInputs[msg.id] || ''}
-                      onChange={(e) =>
-                        setReplyInputs((prev) => ({ ...prev, [msg.id]: e.target.value }))
-                      }
-                      onKeyDown={(e) => e.key === 'Enter' && handleSendReply(msg.id)}
-                    />
-                    <div className="flex justify-end items-center mt-1 gap-2">
-                      <button
-                        onClick={() =>
-                          setShowReplyEmoji((prev) => ({ ...prev, [msg.id]: !prev[msg.id] }))
-                        }
-                        className="text-lg"
-                      >
-                        😊
-                      </button>
-                      <button
-                        className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded text-sm"
-                        onClick={() => handleSendReply(msg.id)}
-                      >
-                        Enviar resposta
-                      </button>
-                    </div>
-                    {showReplyEmoji[msg.id] && (
-                      <div className="absolute bottom-[100%] right-0 z-50">
-                        <Picker
-                          data={dataEmoji}
-                          onEmojiSelect={(emoji: any) =>
-                            setReplyInputs((prev) => ({
-                              ...prev,
-                              [msg.id]: (prev[msg.id] || '') + emoji.native,
-                            }))
-                          }
-                          theme="light"
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </details>
 
             </MessageBubble>
           );
