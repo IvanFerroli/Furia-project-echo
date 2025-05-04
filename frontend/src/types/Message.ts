@@ -8,5 +8,6 @@ export interface Message {
     dislikes: number;
     parent_id?: number;
     replyCount?: number;
+    profile_image?: string;
   }
   

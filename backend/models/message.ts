@@ -9,15 +9,17 @@
 
     export async function getAllMessages() {
         const [rows]: [RowDataPacket[], any] = await db.query(`
-        SELECT 
-        m.*, 
-        (SELECT COUNT(*) FROM messages AS replies WHERE replies.parent_id = m.id) AS replyCount
-        FROM messages m
-        ORDER BY timestamp DESC
-    `);
+            SELECT 
+                m.*, 
+                u.profile_image,
+                (SELECT COUNT(*) FROM messages AS replies WHERE replies.parent_id = m.id) AS replyCount
+            FROM messages m
+            LEFT JOIN users u ON u.id = m.user_id
+            ORDER BY m.timestamp DESC
+        `);
         return rows;
     }
-
+    
     export async function createMessage({
         user_id,
         nickname,

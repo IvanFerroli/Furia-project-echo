@@ -114,10 +114,11 @@ export default function FanThreadChat() {
                   <div className={`max-w-[70%] p-4 rounded-2xl shadow-sm ${isMine ? 'bg-blue-500 text-white' : 'bg-gray-100 text-black'}`}>
                     <div className="flex items-center gap-2 mb-1">
                       <img
-                        src={isMine ? avatar : '/default-avatar.png'}
+                        src={isMine ? avatar : msg.profile_image || '/default-avatar.png'}
                         alt="Avatar"
                         className="w-6 h-6 rounded-full object-cover"
                       />
+
                       <strong>
                         {msg.nickname}
                         {msg.nickname === nick && hasTrophy && ' 🏆'}
