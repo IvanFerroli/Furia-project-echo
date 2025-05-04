@@ -6,20 +6,7 @@ import { getUserProfile } from '../services/getUserProfile';
 import { getUserAwards } from '../services/getUserAwards';
 import { fetchMessages, sendMessage, reactToMessage } from '../services/messagesService';
 import MessageBubble from '../components/MessageBubble';
-
-
-export interface Message {
-  id: number;
-  user_id?: string;
-  nickname: string;
-  text: string;
-  timestamp: string;
-  likes: number;
-  dislikes: number;
-  parent_id?: number;
-  replyCount?: number;
-  profile_image?: string;
-}
+import { Message } from '../types/Message'; // ajustar caminho se necessário
 
 export default function FanThreadChat() {
   const { user } = useAuth();
@@ -137,6 +124,7 @@ export default function FanThreadChat() {
                       </div>
                     </div>
                   ))}
+
                   <div className="relative mt-2">
                     <input
                       className="border border-gray-300 rounded-lg p-2 w-full text-sm"
@@ -183,7 +171,6 @@ export default function FanThreadChat() {
             </MessageBubble>
           );
         })}
-
       </div>
 
       <div className="p-4 bg-white rounded-b-[32px]">
@@ -195,8 +182,12 @@ export default function FanThreadChat() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
           />
-          <button onClick={() => setShowEmojiPicker(!showEmojiPicker)} className="px-3 py-2 bg-gray-100 rounded-xl">😊</button>
-          <button onClick={handleSend} className="bg-blue-500 text-white px-4 py-2 rounded-xl">Enviar</button>
+          <button onClick={() => setShowEmojiPicker(!showEmojiPicker)} className="px-3 py-2 bg-gray-100 rounded-xl">
+            😊
+          </button>
+          <button onClick={handleSend} className="bg-blue-500 text-white px-4 py-2 rounded-xl">
+            Enviar
+          </button>
         </div>
 
         {showEmojiPicker && (
@@ -207,4 +198,5 @@ export default function FanThreadChat() {
       </div>
     </div>
   );
+
 }
