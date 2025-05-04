@@ -2,9 +2,10 @@ import { Request, Response } from "express";
 import {
 	getUserById,
 	updateUserProfile,
-	getUserMetrics as getUserMetricsModel,
+	getUserFullMetrics,
 	createUserIfMissing,
 } from "../models/user";
+
 import { checkAwardExists, assignAward, removeAward } from "../models/award";
 import validateCpf from "../utils/validateCpf";
 
@@ -84,7 +85,7 @@ export const getUserMetrics = async (
 	res: Response
 ): Promise<void> => {
 	try {
-		const metrics = await getUserMetricsModel(req.params.id);
+		const metrics = await getUserFullMetrics(req.params.id);
 		res.json(metrics);
 	} catch (err) {
 		console.error("getUserMetrics error:", err);
