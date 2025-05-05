@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Picker from '@emoji-mart/react';
 import dataEmoji from '@emoji-mart/data';
 import { useAuth } from '../contexts/AuthContext';
@@ -19,7 +19,7 @@ export default function FanThreadChat() {
   const [replyInputs, setReplyInputs] = useState<Record<number, string>>({});
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showReplyEmoji, setShowReplyEmoji] = useState<Record<number, boolean>>({});
-
+  const bottomRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,20 +44,26 @@ export default function FanThreadChat() {
           defaults[msg.id] = false;
         });
         setShowReplyEmoji(defaults);
+        setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 0);
       } catch (err) {
         console.error('Erro ao buscar mensagens:', err);
       }
     };
 
-
     fetchData();
     loadMessages();
   }, [user]);
+
+  // Novo efeito: scroll automático após cada atualização de messages
+  useEffect(() => {
+    setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 0);
+  }, [messages.length]);
 
   const refreshMessages = async () => {
     try {
       const updated = await fetchMessages();
       setMessages(updated);
+      // Removido scroll daqui (agora é automático via useEffect acima)
     } catch (err) {
       console.error('Erro ao atualizar mensagens:', err);
     }
@@ -102,57 +108,74 @@ export default function FanThreadChat() {
 
   return (
     <div
-      className="mt-[50px] mb-[100px] w-[90%] mx-auto bg-[#f9f9f9] shadow-xl rounded-[32px] min-h-[1000px] flex flex-col"
-      style={{ fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif' }}
+      className="w-[90%] mx-auto my-[50px] shadow-xl rounded-[32px] flex flex-col"
+      style={{
+        fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif',
+        backgroundColor: '#f9f9f9',
+        padding: '24px',
+        maxHeight: 'calc(100vh - 100px)',
+        msOverflowX: 'hidden',
+      }}
     >
-      <div className="flex-1 p-4 overflow-y-scroll space-y-6">
-        {messages.filter(m => !m.parent_id).map(msg => {
-          const isMine = user?.uid === msg.user_id;
-          const isReplyOpen = showReplyEmoji[msg.id];
-
-          return (
-            <div key={msg.id} className="space-y-2">
-              <MessageBubble
-                message={msg}
-                isMine={isMine}
-                avatar={avatar}
-                hasTrophy={hasTrophy && msg.nickname === nick}
-                onReact={handleReact}
-                onToggleReply={() =>
-                  setShowReplyEmoji(prev => ({ ...prev, [msg.id]: !prev[msg.id] }))
-                }
-              />
-
-
-              {isReplyOpen && (
-                <ReplyBubble
-                  parentMessage={msg}
-                  replies={messages.filter(r => r.parent_id === msg.id)}
-                  user={user}
-                  nick={nick}
+      {/* Área scrollável com mensagens */}
+      <div
+        className="flex-1 overflow-y-auto pr-2"
+        style={{
+          display: 'flex',
+          flexDirection: 'column-reverse',
+          gap: '24px',
+          paddingBottom: '24px',
+        }}
+      >
+        <div ref={bottomRef} />
+        {messages
+          .filter(m => !m.parent_id)
+          .map(msg => {
+            const isMine = user?.uid === msg.user_id;
+            const isReplyOpen = showReplyEmoji[msg.id];
+  
+            return (
+              <div key={msg.id} className="space-y-2">
+                <MessageBubble
+                  message={msg}
+                  isMine={isMine}
                   avatar={avatar}
-                  replyValue={replyInputs[msg.id] || ''}
-                  onChange={(value) =>
-                    setReplyInputs(prev => ({ ...prev, [msg.id]: value }))
-                  }
-                  onSendReply={() => handleSendReply(msg.id)}
+                  hasTrophy={hasTrophy && msg.nickname === nick}
                   onReact={handleReact}
-                  showEmoji={showReplyEmoji[msg.id] === true}
-                  toggleEmoji={() =>
-                    setShowReplyEmoji(prev => {
-                      const current = prev[msg.id];
-                      if (current === true) return { ...prev, [msg.id]: false };
-                      else return { ...prev, [msg.id]: true };
-                    })
+                  onToggleReply={() =>
+                    setShowReplyEmoji(prev => ({ ...prev, [msg.id]: !prev[msg.id] }))
                   }
                 />
-              )}
-            </div>
-          );
-        })}
+  
+                {isReplyOpen && (
+                  <ReplyBubble
+                    parentMessage={msg}
+                    replies={messages.filter(r => r.parent_id === msg.id)}
+                    user={user}
+                    nick={nick}
+                    avatar={avatar}
+                    replyValue={replyInputs[msg.id] || ''}
+                    onChange={(value) =>
+                      setReplyInputs(prev => ({ ...prev, [msg.id]: value }))
+                    }
+                    onSendReply={() => handleSendReply(msg.id)}
+                    onReact={handleReact}
+                    showEmoji={showReplyEmoji[msg.id] === true}
+                    toggleEmoji={() =>
+                      setShowReplyEmoji(prev => {
+                        const current = prev[msg.id];
+                        return { ...prev, [msg.id]: !current };
+                      })
+                    }
+                  />
+                )}
+              </div>
+            );
+          })}
       </div>
-
-      <div className="p-4 bg-white rounded-b-[32px]">
+  
+      {/* Barra fixa no fundo do wrapper */}
+      <div className="pt-4 border-t border-gray-300 bg-[#f9f9f9]">
         <div className="flex gap-2 items-center">
           <input
             className="flex-1 border border-gray-300 p-3 rounded-xl"
@@ -161,22 +184,29 @@ export default function FanThreadChat() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
           />
-          <button onClick={() => setShowEmojiPicker(!showEmojiPicker)} className="px-3 py-2 bg-gray-100 rounded-xl">
+          <button
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+            className="px-3 py-2 bg-gray-100 rounded-xl"
+          >
             😊
           </button>
-          <button onClick={handleSend} className="bg-blue-500 text-white px-4 py-2 rounded-xl">
+          <button
+            onClick={handleSend}
+            className="bg-blue-500 text-white px-4 py-2 rounded-xl"
+          >
             Enviar
           </button>
         </div>
-
+  
         {showEmojiPicker && (
-          <div className="absolute bottom-[100%] right-4">
-            <Picker data={dataEmoji} onEmojiSelect={handleEmojiSelect} theme="light" />
+          <div className="relative">
+            <div className="absolute bottom-[110%] right-0 z-50">
+              <Picker data={dataEmoji} onEmojiSelect={handleEmojiSelect} theme="light" />
+            </div>
           </div>
         )}
       </div>
     </div>
   );
-
-
+  
 }
