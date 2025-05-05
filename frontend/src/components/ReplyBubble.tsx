@@ -34,12 +34,6 @@ export default function ReplyBubble({
 
     const hasMounted = useRef(false);
 
-    useEffect(() => {
-        console.log('MOUNT ReplyBubble:', {
-            msgId: parentMessage.id,
-            showEmoji,
-        });
-    }, []);
 
     useEffect(() => {
         if (!hasMounted.current) {
@@ -73,16 +67,50 @@ export default function ReplyBubble({
         >
             <div className="bg-[#1e1e1e] text-[#f3f4f6] p-6 rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.4)] space-y-4">
                 {replies.map((rep) => (
-                    <div key={rep.id} className="bg-[#2a2a2a] rounded-xl p-3 shadow-inner">
+                    <div
+                        key={rep.id}
+                        className="rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.4)] p-6"
+                        style={{
+                            backgroundColor: rep.user_id === user?.uid ? '#1e1e1e' : '#3a3d5c',
+                            color: '#f3f4f6',
+                            fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif',
+                        }}
+                    >
+
                         <div className="flex justify-between items-center mb-1">
-                            <strong style={{ fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif' }}>
-                                {rep.nickname}
-                            </strong>
-                            <span className="text-xs text-gray-400">
+                            <div
+                                style={{
+                                    position: 'absolute',
+                                    top: '16px',
+                                    right: rep.user_id === user?.uid ? '75px' : 'auto',
+                                    left: rep.user_id === user?.uid ? 'auto' : '75px',
+                                    fontSize: '17px',
+                                    fontWeight: 700,
+                                    fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                }}
+                            >
+                                <span>{rep.nickname}</span>
+                            </div>
+
+                            <span style={{ fontSize: '12px', color: '#c0c0c0',padding: '20px' }}>
+
                                 {new Date(rep.timestamp).toLocaleString()}
                             </span>
                         </div>
-                        <p className="text-sm">{rep.text}</p>
+                        <div
+                            className="flex items-center justify-center text-center text-[15px] leading-relaxed whitespace-pre-wrap break-words"
+                            style={{
+                                minHeight: '60px',
+                                padding: '0 8px',
+                                fontFamily: '"Helvetica World", Arial, sans-serif',
+                            }}
+                        >
+                            {rep.text}
+                        </div>
+
                         <div className="flex gap-2 mt-2 text-xs">
                             <button
                                 className="bg-gray-100 text-black rounded-full px-3 py-1"

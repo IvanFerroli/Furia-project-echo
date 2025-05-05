@@ -35,7 +35,7 @@ export default function MessageBubble({
                     paddingLeft: '32px',
                     paddingRight: '32px',
                     fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif',
-                    backgroundColor: '#1e1e1e',
+                    backgroundColor: isMine ? '#1e1e1e' : '#3a3d5c',
                     color: '#f3f4f6',
                     borderRadius: '2rem',
                     boxShadow: '0 10px 25px rgba(0,0,0,0.4)',
@@ -48,9 +48,20 @@ export default function MessageBubble({
                 {!isMine && (
                     <img
                         src={message.profile_image || '/default-avatar.png'}
-                        className="w-8 h-8 rounded-full object-cover absolute top-[-16px] left-[-16px] border-2 border-white shadow-md"
+                        style={{
+                            width: '50px',
+                            height: '50px',
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                            position: 'absolute',
+                            top: '10px',
+                            left: '10px',
+                            border: '2px solid white',
+                            boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+                        }}
                     />
                 )}
+
                 {isMine && (
                     <img
                         src={avatar}
