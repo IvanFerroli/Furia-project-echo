@@ -204,7 +204,7 @@ export async function createUserIfMissing({
 			[id, id, email, nickname, profile_image]
 		);
 	} else {
-		// Atualiza a imagem se for um login futuro
+		// Atualiza a imagem de perfil para usuários antigos ao logar
 		await db.query(`UPDATE users SET profile_image = ? WHERE id = ?`, [
 			profile_image,
 			id,
