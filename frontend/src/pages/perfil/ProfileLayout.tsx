@@ -46,10 +46,21 @@ export default function ProfileLayout() {
       >
         <div className="flex flex-col items-center mb-6 text-center">
           <img
-            src={user.photoURL || '/furia-logo.svg'}
+            src={user.photoURL || '/furia-logos.png'}
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = '/furia-logos.png'
+            }}
             alt="Avatar"
-            className="w-24 h-24 rounded-full shadow-lg ring-2 ring-zinc-700 ring-opacity-60 object-cover"
+            style={{
+              width: '100px',
+              height: '100px',
+              borderRadius: '50%',
+              objectFit: 'cover',
+              border: '2px solid black',
+              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.15)',
+            }}
           />
+
           <h2 className="text-xl font-bold text-zinc-800 mt-3">
             {user.displayName || 'Furioso(a)'}
           </h2>
