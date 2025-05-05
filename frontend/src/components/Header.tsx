@@ -80,15 +80,24 @@ export default function Header() {
                 <img
                   src={user.photoURL}
                   alt="Avatar"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = '/furia-logos.png';
+                  }}
                   style={{
-                    height: '22px',
-                    width: '22px',
+                    height: '26px',
+                    width: '26px',
                     borderRadius: '50%',
                     cursor: 'pointer',
                     objectFit: 'cover',
+                    border: '1px solid black',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                    marginBottom: '4px',
                   }}
+
                 />
               ) : (
+
                 <User
                   size={24} // Aumentei aqui
                   strokeWidth={1.5}
