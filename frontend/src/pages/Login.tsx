@@ -32,7 +32,6 @@ export default function Login() {
     }
   };
 
-
   return (
     <div style={{
       display: 'flex',
@@ -41,6 +40,7 @@ export default function Login() {
       height: '100vh',
       backgroundColor: '#fff',
       padding: '0 16px',
+      fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif',
     }}>
       <div style={{
         display: 'flex',
@@ -54,16 +54,18 @@ export default function Login() {
           border: '1px solid #ddd',
           borderRadius: '8px',
           padding: '32px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          textAlign: 'center', // 👈 adiciona aqui
         }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '24px' }}>ENTRAR</h2>
-          <p style={{ fontSize: '12px', marginBottom: '16px' }}>ENTRE COM SEU EMAIL E SENHA PARA CONTINUAR</p>
-
-          <input type="email" placeholder="E-MAIL" style={inputStyle} disabled />
-          <input type="password" placeholder="SENHA" style={inputStyle} disabled />
-
-          <button style={submitButtonStyle} disabled>ENTRAR</button>
-
-          <div style={{ margin: '16px 0', height: '1px', backgroundColor: '#eee' }} />
+          <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '8px' }}>BEM-VINDO AO</h2>
+          <h1 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '24px', letterSpacing: '1px' }}>
+            FURIA PROJECT ECHO
+          </h1>
+          <p style={{ fontSize: '13px', marginBottom: '32px', color: '#444' }}>
+            Faça login com sua conta Google para acessar o chat e a área de fãs.
+          </p>
 
           <button
             onClick={handleGoogleLogin}
@@ -80,11 +82,9 @@ export default function Login() {
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="20" />
             Continuar com o Google
           </button>
-
-          <p style={{ fontSize: '12px', marginTop: '16px' }}>
-            <a href="#" style={{ color: 'gray', textDecoration: 'underline' }}>ESQUECEU SUA SENHA?</a>
-          </p>
         </div>
+
+
 
         {/* Right - Register */}
         <div style={{
@@ -102,9 +102,19 @@ export default function Login() {
             EM APENAS UM PASSO, CRIE UMA CONTA E FINALIZE SUA COMPRA<br />
             AINDA NÃO TEM CONTA?
           </p>
-          <button style={submitButtonStyle}>
+          <a
+            href="https://checkout.furia.gg/login/cadastro?returnUrl="
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              ...submitButtonStyle,
+              display: 'block',
+              textAlign: 'center',
+              textDecoration: 'none',
+            }}
+          >
             CADASTRE-SE EM NOSSA LOJA
-          </button>
+          </a>
         </div>
       </div>
     </div>

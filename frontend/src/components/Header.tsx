@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FaShoppingBag, FaUser, FaSearch } from 'react-icons/fa';
+import { ShoppingBag, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { auth } from '../services/firebase';
@@ -68,7 +68,6 @@ export default function Header() {
           position: 'absolute',
           right: 0,
         }}>
-          <FaSearch size={16} color="black" style={{ cursor: 'pointer' }} />
 
           {/* Avatar com hover menu mais suave */}
           <div
@@ -90,7 +89,17 @@ export default function Header() {
                   }}
                 />
               ) : (
-                <FaUser size={16} color="black" style={{ cursor: 'pointer' }} />
+                <User
+                  size={24} // Aumentei aqui
+                  strokeWidth={1.5}
+                  style={{
+                    color: 'black',
+                    cursor: 'pointer',
+                  }}
+                />
+
+
+
               )}
             </div>
 
@@ -149,7 +158,16 @@ export default function Header() {
 
           <div>
             <a href="https://furia.gg" target="_blank" rel="noopener noreferrer">
-              <FaShoppingBag size={16} color="black" style={{ cursor: 'pointer' }} />
+              <ShoppingBag
+                size={24}
+                strokeWidth={1.5}
+                style={{
+                  color: 'black',
+                  cursor: 'pointer',
+                }}
+              />
+
+
             </a>
           </div>
         </div>

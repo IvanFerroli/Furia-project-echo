@@ -21,6 +21,20 @@ export default function FanThreadChat() {
   const [showReplyEmoji, setShowReplyEmoji] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
+    if (messages.length > 0) {
+      setShowReplyEmoji(prev => {
+        const updated = { ...prev };
+        messages.forEach((msg) => {
+          if (updated[msg.id] === undefined) {
+            updated[msg.id] = false;
+          }
+        });
+        return updated;
+      });
+    }
+  }, [messages]);
+
+  useEffect(() => {
     const fetchData = async () => {
       if (!user?.uid) return;
       try {
@@ -38,10 +52,16 @@ export default function FanThreadChat() {
       try {
         const data = await fetchMessages();
         setMessages(data);
+        const defaults: Record<number, boolean> = {};
+        data.forEach((msg) => {
+          defaults[msg.id] = false;
+        });
+        setShowReplyEmoji(defaults);
       } catch (err) {
         console.error('Erro ao buscar mensagens:', err);
       }
     };
+
 
     fetchData();
     loadMessages();
@@ -94,40 +114,48 @@ export default function FanThreadChat() {
   };
 
   return (
-    <div className="mt-[50px] mb-[100px] w-[90%] mx-auto bg-[#f9f9f9] shadow-xl rounded-[32px] min-h-[1000px] flex flex-col">
-      <div className="flex-1 p-4 overflow-y-scroll space-y-4">
+    <div
+      className="mt-[50px] mb-[100px] w-[90%] mx-auto bg-[#f9f9f9] shadow-xl rounded-[32px] min-h-[1000px] flex flex-col"
+      style={{ fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif' }}
+    >
+      <div className="flex-1 p-4 overflow-y-scroll space-y-6">
         {messages.filter(m => !m.parent_id).map(msg => {
           const isMine = user?.uid === msg.user_id;
+          const isReplyOpen = showReplyEmoji[msg.id];
+
           return (
-            <MessageBubble
-              key={msg.id}
-              message={msg}
-              isMine={isMine}
-              avatar={avatar}
-              hasTrophy={hasTrophy && msg.nickname === nick}
-              onReact={handleReact}
-            >
-              <ReplyBubble
-                parentMessage={msg}
-                replies={messages.filter((r) => r.parent_id === msg.id)}
-                user={user}
-                nick={nick}
+            <div key={msg.id} className="space-y-2">
+              <MessageBubble
+                message={msg}
+                isMine={isMine}
                 avatar={avatar}
-                replyValue={replyInputs[msg.id] || ''}
-                onChange={(value) =>
-                  setReplyInputs((prev) => ({ ...prev, [msg.id]: value }))
-                }
-                onSendReply={() => handleSendReply(msg.id)}
+                hasTrophy={hasTrophy && msg.nickname === nick}
                 onReact={handleReact}
-                showEmoji={!!showReplyEmoji[msg.id]}
-                toggleEmoji={() =>
-                  setShowReplyEmoji((prev) => ({ ...prev, [msg.id]: !prev[msg.id] }))
+                onToggleReply={() =>
+                  setShowReplyEmoji(prev => ({ ...prev, [msg.id]: !prev[msg.id] }))
                 }
               />
 
-
-
-            </MessageBubble>
+              {isReplyOpen && (
+                <ReplyBubble
+                  parentMessage={msg}
+                  replies={messages.filter(r => r.parent_id === msg.id)}
+                  user={user}
+                  nick={nick}
+                  avatar={avatar}
+                  replyValue={replyInputs[msg.id] || ''}
+                  onChange={(value) =>
+                    setReplyInputs(prev => ({ ...prev, [msg.id]: value }))
+                  }
+                  onSendReply={() => handleSendReply(msg.id)}
+                  onReact={handleReact}
+                  showEmoji={showReplyEmoji[msg.id] === true}
+                  toggleEmoji={() =>
+                    setShowReplyEmoji(prev => ({ ...prev, [msg.id]: !prev[msg.id] }))
+                  }
+                />
+              )}
+            </div>
           );
         })}
       </div>
@@ -157,5 +185,6 @@ export default function FanThreadChat() {
       </div>
     </div>
   );
+
 
 }
