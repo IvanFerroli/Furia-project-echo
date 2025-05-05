@@ -47,7 +47,13 @@ export default function MessageBubble({
                 {/* Avatar */}
                 {!isMine && (
                     <img
-                        src={message.profile_image || '/default-avatar.png'}
+                        src={message.profile_image || '/furia-logos.png'}
+                        onError={(e) => {
+                            const img = e.currentTarget as HTMLImageElement;
+                            if (img.src !== window.location.origin + '/furia-logos.png') {
+                                img.src = '/furia-logos.png';
+                            }
+                        }}
                         style={{
                             width: '50px',
                             height: '50px',
@@ -60,11 +66,18 @@ export default function MessageBubble({
                             boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
                         }}
                     />
+
                 )}
 
                 {isMine && (
                     <img
-                        src={avatar}
+                        src={avatar || '/furia-logos.png'}
+                        onError={(e) => {
+                            const img = e.currentTarget as HTMLImageElement;
+                            if (img.src !== window.location.origin + '/furia-logos.png') {
+                                img.src = '/furia-logos.png';
+                            }
+                        }}
                         style={{
                             width: '50px',
                             height: '50px',
@@ -77,6 +90,7 @@ export default function MessageBubble({
                             boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
                         }}
                     />
+
 
                 )}
 

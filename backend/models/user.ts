@@ -203,5 +203,11 @@ export async function createUserIfMissing({
 			`INSERT INTO users (id, firebase_uid, email, nickname, profile_image) VALUES (?, ?, ?, ?, ?)`,
 			[id, id, email, nickname, profile_image]
 		);
+	} else {
+		// Atualiza a imagem se for um login futuro
+		await db.query(`UPDATE users SET profile_image = ? WHERE id = ?`, [
+			profile_image,
+			id,
+		]);
 	}
 }
