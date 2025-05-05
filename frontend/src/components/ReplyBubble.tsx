@@ -63,43 +63,82 @@ export default function ReplyBubble({
                 transform: 'translateY(30px)',
                 fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif',
                 transition: 'all 0.4s ease-in-out',
+                borderRadius: '2rem',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.4)',
+                backgroundColor: '#1e1e1e',
+                padding: '32px',
             }}
         >
-            <div className="bg-[#1e1e1e] text-[#f3f4f6] p-6 rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.4)] space-y-4">
-                {replies.map((rep) => (
+            {replies.map((rep) => {
+                const isMine = rep.user_id === user?.uid;
+                return (
                     <div
                         key={rep.id}
-                        className="rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.4)] p-6"
+                        className="relative flex flex-col hover:scale-[1.01] transition-transform"
                         style={{
-                            backgroundColor: rep.user_id === user?.uid ? '#1e1e1e' : '#3a3d5c',
+                            backgroundColor: isMine ? '#2a2a2a' : '#494b6b',
                             color: '#f3f4f6',
                             fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif',
+                            borderRadius: '2rem',
+                            boxShadow: '0 10px 25px rgba(0,0,0,0.4)',
+                            padding: '32px',
+                            marginBottom: '20px',
                         }}
                     >
+                        {/* Avatar */}
+                        <img
+                            src={rep.profile_image || '/furia-logos.png'}
+                            onError={(e) => {
+                                const img = e.currentTarget as HTMLImageElement;
+                                if (img.src !== window.location.origin + '/furia-logos.png') {
+                                    img.src = '/furia-logos.png';
+                                }
+                            }}
+                            style={{
+                                width: '50px',
+                                height: '50px',
+                                borderRadius: '50%',
+                                objectFit: 'cover',
+                                position: 'absolute',
+                                top: '10px',
+                                left: '10px',
+                                border: '2px solid white',
+                                boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+                            }}
+                        />
 
-                        <div className="flex justify-between items-center mb-1">
-                            <div
-                                style={{
-                                    position: 'absolute',
-                                    top: '16px',
-                                    right: rep.user_id === user?.uid ? '75px' : 'auto',
-                                    left: rep.user_id === user?.uid ? 'auto' : '75px',
-                                    fontSize: '17px',
-                                    fontWeight: 700,
-                                    fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '6px',
-                                }}
-                            >
-                                <span>{rep.nickname}</span>
-                            </div>
-
-                            <span style={{ fontSize: '12px', color: '#c0c0c0',padding: '20px' }}>
-
-                                {new Date(rep.timestamp).toLocaleString()}
-                            </span>
+                        {/* Nickname */}
+                        <div
+                            style={{
+                                position: 'absolute',
+                                top: '16px',
+                                left: '75px',
+                                fontSize: '17px',
+                                fontWeight: 700,
+                                fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                            }}
+                        >
+                            <span>{rep.nickname}</span>
                         </div>
+
+                        {/* Timestamp */}
+                        <span
+                            style={{
+                                position: 'absolute',
+                                bottom: '20px',
+                                left: '32px',
+                                fontSize: '12px',
+                                color: '#c0c0c0',
+                                fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif',
+                            }}
+                        >
+                            {new Date(rep.timestamp).toLocaleString()}
+                        </span>
+
+                        {/* Texto */}
                         <div
                             className="flex items-center justify-center text-center text-[15px] leading-relaxed whitespace-pre-wrap break-words"
                             style={{
@@ -111,6 +150,7 @@ export default function ReplyBubble({
                             {rep.text}
                         </div>
 
+                        {/* Reações */}
                         <div className="flex gap-2 mt-2 text-xs">
                             <button
                                 className="bg-gray-100 text-black rounded-full px-3 py-1"
@@ -128,54 +168,57 @@ export default function ReplyBubble({
                             </button>
                         </div>
                     </div>
-                ))}
+                );
+            })}
 
-                {/* reply input */}
-                <div className="relative">
-                    <input
-                        className="bg-transparent border-b border-gray-500 p-2 w-full text-sm focus:outline-none placeholder:text-gray-400"
-                        placeholder={`Responder a ${parentMessage.nickname}...`}
+            {/* input de resposta */}
+            <div className="relative">
+                <input
+                    className="bg-transparent border-b border-gray-500 p-2 w-full text-sm focus:outline-none placeholder:text-gray-400"
+                    style={{
+                        fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif',
+                        color: 'white'
+                    }}
+                    placeholder={`Responder a ${parentMessage.nickname}...`}
+                    value={replyValue}
+                    onChange={(e) => onChange(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && onSendReply(parentMessage.id)}
+                />
+
+                <div className="flex justify-end items-center gap-2 mt-2 relative">
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            toggleEmoji();
+                        }}
+                        className="text-lg hover:scale-110 transition-transform"
                         style={{ fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif' }}
-                        value={replyValue}
-                        onChange={(e) => onChange(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && onSendReply(parentMessage.id)}
-                    />
+                    >
+                        😊
+                    </button>
 
-                    {/* botão e picker agrupados no mesmo wrapper */}
-                    <div className="flex justify-end items-center gap-2 mt-2 relative">
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                toggleEmoji();
-                            }}
-                            className="text-lg hover:scale-110 transition-transform"
-                            style={{ fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif' }}
-                        >
-                            😊
-                        </button>
+                    <button
+                        onClick={() => onSendReply(parentMessage.id)}
+                        className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-4 rounded-full text-sm shadow-md"
+                        style={{ fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif' }}
+                    >
+                        Enviar
+                    </button>
 
-                        <button
-                            onClick={() => onSendReply(parentMessage.id)}
-                            className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-4 rounded-full text-sm shadow-md"
-                            style={{ fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif' }}
-                        >
-                            Enviar
-                        </button>
-
-                        {hasMounted.current && showEmoji && (
-                            <div className="absolute bottom-[110%] right-0 z-50">
-                                <Picker
-                                    data={dataEmoji}
-                                    onEmojiSelect={(emoji: any) =>
-                                        onChange(replyValue + emoji.native)
-                                    }
-                                    theme="dark"
-                                />
-                            </div>
-                        )}
-                    </div>
+                    {hasMounted.current && showEmoji && (
+                        <div className="absolute bottom-[110%] right-0 z-50">
+                            <Picker
+                                data={dataEmoji}
+                                onEmojiSelect={(emoji: any) =>
+                                    onChange(replyValue + emoji.native)
+                                }
+                                theme="dark"
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
     );
+
 }
