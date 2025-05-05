@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import Picker from '@emoji-mart/react';
 import dataEmoji from '@emoji-mart/data';
 import { Message } from '../types/Message';
@@ -9,12 +9,8 @@ interface Props {
     user: any;
     nick: string;
     avatar: string;
-    onSendReply: (parentId: number) => void;
+    onSendReply: (parentId: number, text: string) => void;
     onReact: (id: number, type: 'like' | 'dislike') => void;
-    replyValue: string;
-    onChange: (value: string) => void;
-    showEmoji: boolean;
-    toggleEmoji: () => void;
 }
 
 export default function ReplyBubble({
@@ -24,16 +20,12 @@ export default function ReplyBubble({
     nick,
     avatar,
     onSendReply,
-    onReact,
-    replyValue,
-    onChange,
-    showEmoji,
-    toggleEmoji
+    onReact
 }: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
-
     const hasMounted = useRef(false);
-
+    const [replyValue, setReplyValue] = useState('');
+    const [showEmoji, setShowEmoji] = useState(false);
 
     useEffect(() => {
         if (!hasMounted.current) {
@@ -47,18 +39,18 @@ export default function ReplyBubble({
                 containerRef.current &&
                 !containerRef.current.contains(event.target as Node)
             ) {
-                toggleEmoji();
+                setShowEmoji(false);
             }
         }
 
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [showEmoji, toggleEmoji]);
+    }, [showEmoji]);
 
     return (
         <div
             ref={containerRef}
-            className="w-[80%] ml-auto mr-auto mt-[-30px] mb-[40px] z-10 relative animate-fade-in"
+            className="w-[80%] ml-auto mr-auto mt-[-40px] mb-[40px] z-100 relative animate-fade-in"
             style={{
                 transform: 'translateY(30px)',
                 fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif',
@@ -69,8 +61,10 @@ export default function ReplyBubble({
                 padding: '32px',
             }}
         >
+            {/* Lista de respostas */}
             {replies.map((rep) => {
                 const isMine = rep.user_id === user?.uid;
+
                 return (
                     <div
                         key={rep.id}
@@ -85,7 +79,7 @@ export default function ReplyBubble({
                             marginBottom: '20px',
                         }}
                     >
-                        {/* Avatar */}
+                        {/* Avatar da resposta */}
                         <img
                             src={rep.profile_image || '/furia-logos.png'}
                             onError={(e) => {
@@ -107,7 +101,7 @@ export default function ReplyBubble({
                             }}
                         />
 
-                        {/* Nickname */}
+                        {/* Nickname da resposta */}
                         <div
                             style={{
                                 position: 'absolute',
@@ -115,10 +109,10 @@ export default function ReplyBubble({
                                 left: '75px',
                                 fontSize: '17px',
                                 fontWeight: 700,
-                                fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif',
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '6px',
+                                fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif',
                             }}
                         >
                             <span>{rep.nickname}</span>
@@ -150,7 +144,7 @@ export default function ReplyBubble({
                             {rep.text}
                         </div>
 
-                        {/* Reações */}
+                        {/* Botões */}
                         <div className="flex gap-2 mt-2 text-xs">
                             <button
                                 className="bg-gray-100 text-black rounded-full px-3 py-1"
@@ -171,34 +165,45 @@ export default function ReplyBubble({
                 );
             })}
 
-            {/* input de resposta */}
-            <div className="relative">
+            {/* Campo de entrada de resposta */}
+            <div className="relative mt-4">
                 <input
                     className="bg-transparent border-b border-gray-500 p-2 w-full text-sm focus:outline-none placeholder:text-gray-400"
                     style={{
                         fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif',
-                        color: 'white'
+                        color: 'white',
                     }}
                     placeholder={`Responder a ${parentMessage.nickname}...`}
                     value={replyValue}
-                    onChange={(e) => onChange(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && onSendReply(parentMessage.id)}
+                    onChange={(e) => setReplyValue(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' && replyValue.trim()) {
+                            onSendReply(parentMessage.id, replyValue.trim());
+                            setReplyValue('');
+                            setShowEmoji(false);
+                        }
+                    }}
                 />
 
                 <div className="flex justify-end items-center gap-2 mt-2 relative">
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
-                            toggleEmoji();
+                            setShowEmoji((prev) => !prev);
                         }}
                         className="text-lg hover:scale-110 transition-transform"
                         style={{ fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif' }}
                     >
                         😊
                     </button>
-
                     <button
-                        onClick={() => onSendReply(parentMessage.id)}
+                        onClick={() => {
+                            if (replyValue.trim()) {
+                                onSendReply(parentMessage.id, replyValue.trim());
+                                setReplyValue('');
+                                setShowEmoji(false);
+                            }
+                        }}
                         className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-4 rounded-full text-sm shadow-md"
                         style={{ fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif' }}
                     >
@@ -209,9 +214,7 @@ export default function ReplyBubble({
                         <div className="absolute bottom-[110%] right-0 z-50">
                             <Picker
                                 data={dataEmoji}
-                                onEmojiSelect={(emoji: any) =>
-                                    onChange(replyValue + emoji.native)
-                                }
+                                onEmojiSelect={(emoji: any) => setReplyValue(replyValue + emoji.native)}
                                 theme="dark"
                             />
                         </div>
@@ -220,5 +223,4 @@ export default function ReplyBubble({
             </div>
         </div>
     );
-
 }

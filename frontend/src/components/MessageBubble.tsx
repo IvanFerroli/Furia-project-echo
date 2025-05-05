@@ -1,23 +1,28 @@
-import React from 'react';
+import { useState } from 'react';
 import { Message } from '../types/Message';
 
 interface Props {
     message: Message;
-    isMine: boolean;
+    currentUser: any;
     avatar: string;
     hasTrophy: boolean;
     onReact: (id: number, type: 'like' | 'dislike') => void;
-    onToggleReply: () => void;
+    onToggleReply: () => void; // 👈 necessário para controle externo
 }
+
 
 export default function MessageBubble({
     message,
-    isMine,
+    currentUser,
     avatar,
     hasTrophy,
     onReact,
-    onToggleReply
+    onToggleReply,
 }: Props) {
+    const [isReplyOpen, setIsReplyOpen] = useState(false);
+
+    const isMine = currentUser?.uid === message.user_id;
+
     return (
         <div
             className={`flex ${isMine ? 'justify-end' : 'justify-start'} items-start w-full`}
@@ -90,7 +95,6 @@ export default function MessageBubble({
                             boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
                         }}
                     />
-
 
                 )}
 
@@ -171,10 +175,12 @@ export default function MessageBubble({
                                 fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif'
                             }}
                             onClick={onToggleReply}
+
                         >
                             ...
                         </button>
-                        {message.replyCount > 0 && (
+                        {typeof message.replyCount === 'number' && message.replyCount > 0 && (
+
                             <span
                                 style={{
                                     position: 'absolute',
@@ -199,3 +205,4 @@ export default function MessageBubble({
         </div>
     );
 }
+

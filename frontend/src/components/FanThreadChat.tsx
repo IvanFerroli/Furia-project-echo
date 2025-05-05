@@ -1,13 +1,13 @@
 import { useEffect, useState, useRef } from 'react';
-import Picker from '@emoji-mart/react';
-import dataEmoji from '@emoji-mart/data';
 import { useAuth } from '../contexts/AuthContext';
 import { getUserProfile } from '../services/getUserProfile';
 import { getUserAwards } from '../services/getUserAwards';
 import { fetchMessages, sendMessage, reactToMessage } from '../services/messagesService';
 import MessageBubble from '../components/MessageBubble';
-import { Message } from '../types/Message';
 import ReplyBubble from '../components/ReplyBubble';
+import { Message } from '../types/Message';
+import Picker from '@emoji-mart/react';
+import dataEmoji from '@emoji-mart/data';
 
 export default function FanThreadChat() {
   const { user } = useAuth();
@@ -16,10 +16,10 @@ export default function FanThreadChat() {
   const [hasTrophy, setHasTrophy] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-  const [replyInputs, setReplyInputs] = useState<Record<number, string>>({});
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [showReplyEmoji, setShowReplyEmoji] = useState<Record<number, boolean>>({});
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [replyOpenForId, setReplyOpenForId] = useState<number | null>(null);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,7 +29,7 @@ export default function FanThreadChat() {
         setNick(profile.nickname || '');
         setAvatar(profile.profile_image || '/default-avatar.png');
         const awards = await getUserAwards(user.uid);
-        setHasTrophy(awards.some(a => a.name === 'Verificado'));
+        setHasTrophy(awards.some((a: { name: string }) => a.name === 'Verificado'));
       } catch (err) {
         console.error('Erro ao carregar perfil:', err);
       }
@@ -39,11 +39,6 @@ export default function FanThreadChat() {
       try {
         const data = await fetchMessages();
         setMessages(data);
-        const defaults: Record<number, boolean> = {};
-        data.forEach((msg) => {
-          defaults[msg.id] = false;
-        });
-        setShowReplyEmoji(defaults);
         setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 0);
       } catch (err) {
         console.error('Erro ao buscar mensagens:', err);
@@ -54,7 +49,6 @@ export default function FanThreadChat() {
     loadMessages();
   }, [user]);
 
-  // Novo efeito: scroll automático após cada atualização de messages
   useEffect(() => {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 0);
   }, [messages.length]);
@@ -63,7 +57,6 @@ export default function FanThreadChat() {
     try {
       const updated = await fetchMessages();
       setMessages(updated);
-      // Removido scroll daqui (agora é automático via useEffect acima)
     } catch (err) {
       console.error('Erro ao atualizar mensagens:', err);
     }
@@ -80,14 +73,11 @@ export default function FanThreadChat() {
     }
   };
 
-  const handleSendReply = async (parentId: number) => {
-    const replyText = replyInputs[parentId];
-    if (!nick || !replyText?.trim() || !user?.uid) return;
+  const handleSendReply = async (parentId: number, text: string) => {
+    if (!nick || !text.trim() || !user?.uid) return;
     try {
-      await sendMessage({ user_id: user.uid, nickname: nick, text: replyText, parent_id: parentId });
+      await sendMessage({ user_id: user.uid, nickname: nick, text, parent_id: parentId });
       await refreshMessages();
-      setReplyInputs(prev => ({ ...prev, [parentId]: '' }));
-      setShowReplyEmoji(prev => ({ ...prev, [parentId]: false }));
     } catch (err) {
       console.error('Erro ao enviar resposta:', err);
     }
@@ -102,8 +92,8 @@ export default function FanThreadChat() {
     }
   };
 
-  const handleEmojiSelect = (emoji: any) => {
-    setInput(prev => prev + emoji.native);
+  const toggleReplyForMessage = (id: number) => {
+    setReplyOpenForId(current => (current === id ? null : id));
   };
 
   return (
@@ -117,7 +107,7 @@ export default function FanThreadChat() {
         msOverflowX: 'hidden',
       }}
     >
-      {/* Área scrollável com mensagens */}
+      {/* Scrollable area with messages */}
       <div
         className="flex-1 overflow-y-auto pr-2"
         style={{
@@ -129,52 +119,36 @@ export default function FanThreadChat() {
       >
         <div ref={bottomRef} />
         {messages
-          .filter(m => !m.parent_id)
-          .map(msg => {
-            const isMine = user?.uid === msg.user_id;
-            const isReplyOpen = showReplyEmoji[msg.id];
-  
-            return (
-              <div key={msg.id} className="space-y-2">
-                <MessageBubble
-                  message={msg}
-                  isMine={isMine}
-                  avatar={avatar}
-                  hasTrophy={hasTrophy && msg.nickname === nick}
-                  onReact={handleReact}
-                  onToggleReply={() =>
-                    setShowReplyEmoji(prev => ({ ...prev, [msg.id]: !prev[msg.id] }))
-                  }
-                />
-  
-                {isReplyOpen && (
+          .filter((m) => !m.parent_id)
+          .map((msg) => (
+            <div key={msg.id}>
+              <MessageBubble
+                message={msg}
+                currentUser={user}
+                avatar={avatar}
+                hasTrophy={hasTrophy}
+                onReact={handleReact}
+                onToggleReply={() => setReplyOpenForId((id) => (id === msg.id ? null : msg.id))}
+              />
+              {replyOpenForId === msg.id && (
+                <div className="w-full flex justify-center mt-[-10px] mb-[20px]">
                   <ReplyBubble
                     parentMessage={msg}
-                    replies={messages.filter(r => r.parent_id === msg.id)}
+                    replies={messages.filter((m) => m.parent_id === msg.id)}
                     user={user}
                     nick={nick}
                     avatar={avatar}
-                    replyValue={replyInputs[msg.id] || ''}
-                    onChange={(value) =>
-                      setReplyInputs(prev => ({ ...prev, [msg.id]: value }))
-                    }
-                    onSendReply={() => handleSendReply(msg.id)}
+                    onSendReply={handleSendReply}
                     onReact={handleReact}
-                    showEmoji={showReplyEmoji[msg.id] === true}
-                    toggleEmoji={() =>
-                      setShowReplyEmoji(prev => {
-                        const current = prev[msg.id];
-                        return { ...prev, [msg.id]: !current };
-                      })
-                    }
                   />
-                )}
-              </div>
-            );
-          })}
+                </div>
+              )}
+            </div>
+          ))}
+
       </div>
-  
-      {/* Barra fixa no fundo do wrapper */}
+
+      {/* Input bar */}
       <div className="pt-4 border-t border-gray-300 bg-[#f9f9f9]">
         <div className="flex gap-2 items-center">
           <input
@@ -197,16 +171,16 @@ export default function FanThreadChat() {
             Enviar
           </button>
         </div>
-  
+
         {showEmojiPicker && (
           <div className="relative">
             <div className="absolute bottom-[110%] right-0 z-50">
-              <Picker data={dataEmoji} onEmojiSelect={handleEmojiSelect} theme="light" />
+              <Picker data={dataEmoji} onEmojiSelect={(emoji: { native: string }) => setInput((prev) => prev + emoji.native)}
+                theme="dark" />
             </div>
           </div>
         )}
       </div>
     </div>
   );
-  
 }
