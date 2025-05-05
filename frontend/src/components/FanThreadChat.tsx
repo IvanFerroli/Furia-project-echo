@@ -20,19 +20,6 @@ export default function FanThreadChat() {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showReplyEmoji, setShowReplyEmoji] = useState<Record<number, boolean>>({});
 
-  useEffect(() => {
-    if (messages.length > 0) {
-      setShowReplyEmoji(prev => {
-        const updated = { ...prev };
-        messages.forEach((msg) => {
-          if (updated[msg.id] === undefined) {
-            updated[msg.id] = false;
-          }
-        });
-        return updated;
-      });
-    }
-  }, [messages]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -136,6 +123,7 @@ export default function FanThreadChat() {
                 }
               />
 
+
               {isReplyOpen && (
                 <ReplyBubble
                   parentMessage={msg}
@@ -151,7 +139,11 @@ export default function FanThreadChat() {
                   onReact={handleReact}
                   showEmoji={showReplyEmoji[msg.id] === true}
                   toggleEmoji={() =>
-                    setShowReplyEmoji(prev => ({ ...prev, [msg.id]: !prev[msg.id] }))
+                    setShowReplyEmoji(prev => {
+                      const current = prev[msg.id];
+                      if (current === true) return { ...prev, [msg.id]: false };
+                      else return { ...prev, [msg.id]: true };
+                    })
                   }
                 />
               )}

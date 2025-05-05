@@ -54,20 +54,56 @@ export default function MessageBubble({
                 {isMine && (
                     <img
                         src={avatar}
-                        className="w-8 h-8 rounded-full object-cover absolute top-[-16px] right-[-16px] border-2 border-white shadow-md"
+                        style={{
+                            width: '50px',
+                            height: '50px',
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                            position: 'absolute',
+                            top: '10px',
+                            right: '10px',
+                            border: '2px solid white',
+                            boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+                        }}
                     />
+
                 )}
 
                 {/* Header */}
-                <div className="flex items-center gap-2 mb-3">
-                    <strong className="text-md" style={{ fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif' }}>
-                        {message.nickname}
-                    </strong>
-                    {hasTrophy && <span className="ml-1 text-yellow-400">🏆</span>}
-                    <span className="text-xs text-gray-400">
-                        {new Date(message.timestamp).toLocaleString()}
-                    </span>
+                {/* Nickname no topo esquerdo */}
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: '16px',
+                        right: isMine ? '75px' : 'auto',
+                        left: isMine ? 'auto' : '75px',
+                        fontSize: '17px',
+                        fontWeight: 700,
+                        fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                    }}
+                >
+                    <span>{message.nickname}</span>
+                    {hasTrophy && <span className="text-yellow-400">🏆</span>}
                 </div>
+
+
+                {/* Timestamp no canto inferior esquerdo */}
+                <span
+                    style={{
+                        position: 'absolute',
+                        bottom: '20px',
+                        left: '32px',
+                        fontSize: '12px',
+                        color: '#c0c0c0',
+                        fontFamily: '"Helvetica World", Arial, Helvetica, sans-serif',
+                    }}
+                >
+                    {new Date(message.timestamp).toLocaleString()}
+                </span>
+
 
                 {/* Texto */}
                 <div

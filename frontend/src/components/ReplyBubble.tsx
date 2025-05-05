@@ -35,6 +35,13 @@ export default function ReplyBubble({
     const hasMounted = useRef(false);
 
     useEffect(() => {
+        console.log('MOUNT ReplyBubble:', {
+            msgId: parentMessage.id,
+            showEmoji,
+        });
+    }, []);
+
+    useEffect(() => {
         if (!hasMounted.current) {
             hasMounted.current = true;
             return;
@@ -127,7 +134,7 @@ export default function ReplyBubble({
                             Enviar
                         </button>
 
-                        {showEmoji && (
+                        {hasMounted.current && showEmoji && (
                             <div className="absolute bottom-[110%] right-0 z-50">
                                 <Picker
                                     data={dataEmoji}
