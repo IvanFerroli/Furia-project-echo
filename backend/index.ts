@@ -14,12 +14,12 @@ const app = express()
 const port = process.env.PORT || 3001
 
 app.use(
-    cors({
-      origin: 'http://localhost:5173', // URL do seu frontend
-      credentials: true,
-    })
-  )
-  
+  cors({
+    origin: '*', // Permite chamadas de qualquer origem (ideal pra produção, ajustar se quiser restringir)
+    credentials: true,
+  })
+)
+
 app.use(express.json())
 
 app.use('/admin', adminRoutes)
@@ -28,11 +28,10 @@ app.use('/awards', awardsRoutes)
 app.use('/messages', messagesRoutes)
 app.use('/metrics', metricsRoutes)
 
-
 app.get('/', (req, res) => {
   res.send('FURIA Fan Chat API running 🟢')
 })
 
-app.listen(port, () => {
-  console.log(`Servidor rodando em http://localhost:${port}`)
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Servidor rodando em http://0.0.0.0:${port}`)
 })
