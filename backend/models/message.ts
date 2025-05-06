@@ -96,16 +96,29 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
 
 	const [userStats]: [RowDataPacket[], any] = await db.query(`
         SELECT 
-        u.id AS user_id,
-        u.nickname,
-        COUNT(m.id) AS messages,
-        SUM(m.likes) AS total_likes,
-        SUM(m.dislikes) AS total_dislikes
+          u.id AS user_id,
+          u.nickname,
+          COUNT(m.id) AS messages,
+      
+          -- Subquery: soma dos likes em mensagens do usuário
+          (
+            SELECT COUNT(*) FROM message_reactions r
+            JOIN messages m2 ON r.message_id = m2.id
+            WHERE m2.user_id = u.id AND r.type = 'like'
+          ) AS total_likes,
+      
+          -- Subquery: soma dos dislikes em mensagens do usuário
+          (
+            SELECT COUNT(*) FROM message_reactions r
+            JOIN messages m2 ON r.message_id = m2.id
+            WHERE m2.user_id = u.id AND r.type = 'dislike'
+          ) AS total_dislikes
+      
         FROM users u
         LEFT JOIN messages m ON m.user_id = u.id
         GROUP BY u.id, u.nickname
         ORDER BY total_likes DESC
-    `);
+      `);
 
 	let mostLiked: DashboardPost | null = null;
 	let mostDisliked: DashboardPost | null = null;
