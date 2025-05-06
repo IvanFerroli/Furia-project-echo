@@ -2,10 +2,10 @@ import axios from 'axios';
 import {
   DashboardMetrics,
 } from '../types/DashboardMetrics';
+import { BASE_URL } from '../config';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 export async function getDashboardMetrics(): Promise<DashboardMetrics> {
-  const response = await axios.get<DashboardMetrics>(`${API_BASE}/metrics`);
+  const response = await axios.get<DashboardMetrics>(`${BASE_URL}/metrics`);
   return response.data;
 }
