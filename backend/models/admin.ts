@@ -32,7 +32,8 @@ export async function getDashboardStats() {
 		 ORDER BY likes DESC
 		 LIMIT 1`
 	);
-	const topPost = topPostResult[0];
+	const topPost = topPostResult.length > 0 ? topPostResult[0] : null;
+
 
 	return {
 		total_users: users.total_users,

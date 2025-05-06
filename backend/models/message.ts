@@ -126,8 +126,11 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
 	const streakMap: Record<string, number> = {};
 
 	for (const post of posts) {
-		if (!mostLiked || post.likes > mostLiked.likes) mostLiked = post;
-		if (!mostDisliked || post.dislikes > mostDisliked.dislikes)
+		const likes = post.likes ?? 0;
+		const dislikes = post.dislikes ?? 0;
+
+		if (!mostLiked || likes > (mostLiked.likes ?? 0)) mostLiked = post;
+		if (!mostDisliked || dislikes > (mostDisliked.dislikes ?? 0))
 			mostDisliked = post;
 
 		const foundTags = post.text?.match(/#[\wÀ-ú]+/g);
@@ -137,8 +140,11 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
 			}
 		}
 
-		const date = new Date(post.timestamp).toISOString().split("T")[0];
-		streakMap[date] = (streakMap[date] || 0) + 1;
+		const timestamp = post.timestamp ? new Date(post.timestamp) : null;
+		if (timestamp) {
+			const date = timestamp.toISOString().split("T")[0];
+			streakMap[date] = (streakMap[date] || 0) + 1;
+		}
 	}
 
 	const topHashtags: DashboardHashtag[] = Object.entries(hashtagsMap)

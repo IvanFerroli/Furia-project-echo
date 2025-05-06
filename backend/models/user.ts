@@ -123,7 +123,6 @@ export async function getUserFullMetrics(id: string) {
 		[id, id, id, id, id, id]
 	);
 
-
 	const [awards]: [RowDataPacket[], any] = await db.query(
 		`
 		SELECT COUNT(*) AS count FROM awards WHERE user_id = ?
@@ -162,10 +161,11 @@ export async function getUserFullMetrics(id: string) {
 	const activeDays = activity.length;
 
 	// Calcula % de perfil completo baseado em 6 campos relevantes preenchidos
-	const [[profile]] = await db.query<any[]>(
+	const [profileRows] = await db.query<any[]>(
 		`SELECT bio, city, birthdate, cpf, cep, profile_image FROM users WHERE id = ?`,
 		[id]
 	);
+	const profile = profileRows?.[0] || {};
 	const filledFields = [
 		"bio",
 		"city",
@@ -174,6 +174,7 @@ export async function getUserFullMetrics(id: string) {
 		"cep",
 		"profile_image",
 	].filter((f) => !!profile[f]).length;
+
 	const profileCompletion = Math.round((filledFields / 6) * 100);
 
 	return {
@@ -186,7 +187,6 @@ export async function getUserFullMetrics(id: string) {
 		awardsCount: awards[0].count,
 		profileCompletion,
 	};
-	
 }
 
 export async function createUserIfMissing({
