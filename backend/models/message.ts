@@ -174,6 +174,6 @@ export async function getActivityStreak(): Promise<
 
 	return rows.map((row: any) => ({
 		date: row.active_day,
-		count: row.count,
+		streak: row.streak,
 	}));
 }

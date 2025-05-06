@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5174"; // ajuste conforme necessário
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
 export async function fetchMessages() {
 	const res = await axios.get(`${API_BASE}/messages`);
