@@ -39,12 +39,12 @@ export default function ProfileDashboard() {
     const totalLikes = metrics?.userRanking?.reduce((sum, u) => sum + Number(u.total_likes), 0) ?? 0;
     const topLikes = metrics?.mostLiked?.likes ?? 0;
     const streakData = (metrics?.streak ?? [])
-        .map(({ date, count }) => {
+        .map(({ date, streak }) => {
             const d = new Date(date);
             return {
                 raw: d.getTime(),
                 date: `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`,
-                streak: count,
+                streak: streak,
             };
         })
         .sort((a, b) => a.raw - b.raw)
