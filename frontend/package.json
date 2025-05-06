@@ -27,14 +27,14 @@
 	"devDependencies": {
   "@eslint/js": "^8.57.0",
   "@tailwindcss/postcss": "^4.1.5",
-  "@types/react": "^18.2.38", // ou 19 se mantiver react 19
+  "@types/react": "^18.2.38",
   "@types/react-dom": "^18.2.17",
   "@types/react-router-dom": "^5.3.3",
   "@typescript-eslint/eslint-plugin": "^6.21.0",
   "@typescript-eslint/parser": "^6.21.0",
   "@vitejs/plugin-react": "^4.3.4",
   "autoprefixer": "^10.4.21",
-  "eslint": "^8.57.0", // <- o principal
+  "eslint": "^8.57.0", 
   "eslint-plugin-react-hooks": "^5.2.0",
   "eslint-plugin-react-refresh": "^0.4.19",
   "globals": "^16.0.0",
