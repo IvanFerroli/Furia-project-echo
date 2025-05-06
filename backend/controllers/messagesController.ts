@@ -25,10 +25,9 @@ export const postMessage = async (
 	const { user_id, nickname, text, parent_id } = req.body;
 
 	if (!text || !nickname) {
-        res.status(400).json({ message: 'Text and nickname are required' });
-        return;
-      }
-      
+		res.status(400).json({ message: "Text and nickname are required" });
+		return;
+	}
 
 	try {
 		const newMsg = await createMessage({
@@ -48,16 +47,21 @@ export const patchReaction = async (
 	req: Request,
 	res: Response
 ): Promise<void> => {
-	const { type } = req.body;
+	const { type, user_id } = req.body;
 	const { id } = req.params;
 
 	if (!["like", "dislike"].includes(type)) {
-        res.status(400).json({ message: "Reaction must be like or dislike" });
-        return;
-      }
-      
+		res.status(400).json({ message: "Reaction must be like or dislike" });
+		return;
+	}
+
+	if (!user_id) {
+		res.status(400).json({ message: "Missing user_id" });
+		return;
+	}
+
 	try {
-		await reactToMessage(id, type);
+		await reactToMessage(id, user_id, type);
 		res.json({ message: "Reaction updated" });
 	} catch (err) {
 		console.error("patchReaction error:", err);

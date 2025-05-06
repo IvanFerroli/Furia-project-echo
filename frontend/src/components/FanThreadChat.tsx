@@ -85,8 +85,10 @@ export default function FanThreadChat() {
 
   const handleReact = async (id: number, type: 'like' | 'dislike') => {
     try {
-      await reactToMessage(String(id), type);
+      if (!user?.uid) return;
+      await reactToMessage(String(id), type, user.uid);
       await refreshMessages();
+
     } catch (err) {
       console.error(`Erro ao reagir com ${type}:`, err);
     }
