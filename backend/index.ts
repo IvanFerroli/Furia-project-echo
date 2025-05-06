@@ -11,25 +11,27 @@ import metricsRoutes from './routes/metrics'
 dotenv.config()
 
 const app = express()
-const port = Number(process.env.PORT) || 3001;
+const port = Number(process.env.PORT) || 3001
 
-app.use(
-  cors({
-    origin: 'https://furia-project-echo-1.onrender.com',
-    credentials: true,
-  })
-)
+// ✅ CORS config com preflight
+const corsOptions = {
+  origin: 'https://furia-project-echo-1.onrender.com',
+  credentials: true,
+}
 
+app.use(cors(corsOptions))
+app.options('*', cors(corsOptions)) // 🔥 Habilita preflight
 
 app.use(express.json())
 
+// 🔁 Rotas
 app.use('/admin', adminRoutes)
 app.use('/users', userRoutes)
 app.use('/awards', awardsRoutes)
 app.use('/messages', messagesRoutes)
 app.use('/metrics', metricsRoutes)
 
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
   res.send('FURIA Fan Chat API running 🟢')
 })
 
