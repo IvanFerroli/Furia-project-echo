@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     "noUnusedLocals": false,
-    "noUnusedParameters": false
+    "noUnusedParameters": false,
+    "skipLibCheck": true,
+    "strict": false
   },
   "files": [],
   "references": [
