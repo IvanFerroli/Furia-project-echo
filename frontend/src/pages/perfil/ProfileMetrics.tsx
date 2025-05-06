@@ -55,8 +55,9 @@ export default function ProfileMetrics() {
 
 
                     <MetricBox label="Total de Posts" value={metrics.totalPosts} />
-                    <MetricBox label="Likes Recebidos" value={metrics.totalLikes} />
+                    <MetricBox label="Total de likes" value={metrics.totalLikes} />
                     <MetricBox label="Post com Mais Curtidas" value={metrics.topPost || 'Nenhuma mensagem encontrada'} />
+                    <MetricBox label="Likes do Post com Mais curtidas" value={metrics.topPostLikes} />
                     <MetricBox label="Maior Streak" value={`${metrics.longestStreak} dias consecutivos`} />
                     <MetricBox label="Dias Ativos" value={metrics.activeDays} />
                     <MetricBox label="Data de Criação" value={new Date(metrics.createdAt).toLocaleDateString('pt-BR')} />

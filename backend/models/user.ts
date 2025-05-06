@@ -112,13 +112,17 @@ export async function getUserFullMetrics(id: string) {
 	const [[basicStats]] = await db.query<any[]>(
 		`SELECT
 			(SELECT COUNT(*) FROM messages WHERE user_id = ?) AS totalPosts,
-			(SELECT MAX(likes) FROM messages WHERE user_id = ?) AS totalLikes,
+			(SELECT COUNT(*) FROM message_reactions r
+				JOIN messages m ON m.id = r.message_id
+				WHERE m.user_id = ? AND r.type = 'like') AS totalLikes,
+			(SELECT MAX(likes) FROM messages WHERE user_id = ?) AS topPostLikes,
 			(SELECT text FROM messages WHERE user_id = ? ORDER BY likes DESC LIMIT 1) AS topPost,
 			(SELECT created_at FROM users WHERE id = ?) AS createdAt,
 			(SELECT profile_completed FROM users WHERE id = ?) AS profileCompleted
 		`,
-		[id, id, id, id, id]
+		[id, id, id, id, id, id]
 	);
+
 
 	const [awards]: [RowDataPacket[], any] = await db.query(
 		`
@@ -175,12 +179,14 @@ export async function getUserFullMetrics(id: string) {
 	return {
 		...basicStats,
 		topPost: basicStats.topPost || "Nenhuma mensagem encontrada",
+		topPostLikes: basicStats.topPostLikes || 0,
 		createdAt: basicStats.createdAt,
 		longestStreak,
 		activeDays,
 		awardsCount: awards[0].count,
 		profileCompletion,
 	};
+	
 }
 
 export async function createUserIfMissing({
