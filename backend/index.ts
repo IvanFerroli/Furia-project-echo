@@ -15,10 +15,11 @@ const port = Number(process.env.PORT) || 3001;
 
 app.use(
   cors({
-    origin: '*', // Permite chamadas de qualquer origem (ideal pra produção, ajustar se quiser restringir)
+    origin: 'https://furia-project-echo-1.onrender.com',
     credentials: true,
   })
 )
+
 
 app.use(express.json())
 
