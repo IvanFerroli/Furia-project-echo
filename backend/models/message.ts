@@ -172,8 +172,12 @@ export async function getActivityStreak(): Promise<
             ORDER BY active_day
         `);
 
-	return rows.map((row: any) => ({
-		date: row.active_day,
-		count: row.count,
-	}));
-}
+        return rows.map((row: any) => {
+            console.log("🔥 RAW activity:", row.active_day, row.count);
+            return {
+                date: row.active_day,
+                streak: row.count,
+            };
+        });
+        
+    }

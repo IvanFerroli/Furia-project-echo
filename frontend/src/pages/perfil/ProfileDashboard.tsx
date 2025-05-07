@@ -32,6 +32,7 @@ export default function ProfileDashboard() {
 
         fetchMetrics();
     }, []);
+    
 
     const hashtags = metrics?.topHashtags?.map(h => ({ name: h.tag, value: h.count })) ?? [];
     const totalUsers = metrics?.userRanking?.length ?? 0;
@@ -49,12 +50,6 @@ export default function ProfileDashboard() {
         })
         .sort((a, b) => a.raw - b.raw)
         .map(({ date, streak }) => ({ date, streak }));
-
-
-    console.log("🔥 RAW metrics.streak:", metrics?.streak);
-    console.log("📈 streakData formatado:", streakData);
-
-
 
     return (
         <div
