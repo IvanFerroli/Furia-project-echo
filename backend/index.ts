@@ -14,11 +14,18 @@ const app = express()
 const port = process.env.PORT || 3001
 
 app.use(
-    cors({
-      origin: 'http://localhost:5173', // URL do seu frontend
-      credentials: true,
-    })
-  )
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || /^http:\/\/localhost:517\d$/.test(origin)) {
+        callback(null, true)
+      } else {
+        callback(new Error('Not allowed by CORS'))
+      }
+    },
+    credentials: true,
+  })
+)
+
   
 app.use(express.json())
 
