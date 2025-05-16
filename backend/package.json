@@ -23,6 +23,7 @@
     "@types/express": "^5.0.1",
     "@types/node": "^22.15.3",
     "tsx": "^4.19.4",
+    "typedoc": "^0.28.4",
     "typescript": "^5.8.3"
   }
 }

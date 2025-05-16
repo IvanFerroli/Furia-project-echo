@@ -1,0 +1,11 @@
+{
+    "entryPoints": [
+      "models/admin.ts",
+      "models/message.ts",
+      "models/user.ts"
+    ],
+    "out": "docs",
+    "tsconfig": "./tsconfig.json",
+    "skipErrorChecking": true
+  }
+  
