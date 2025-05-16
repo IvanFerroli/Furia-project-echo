@@ -1,7 +1,12 @@
-import axios from 'axios'
-import { ProfileData } from '../types/ProfileData'
+import axios from "axios";
+import { ProfileData } from "../types/ProfileData";
+import { BASE_URL } from '../config';
 
 export const updateUserProfile = async (userId: string, data: ProfileData) => {
-  const response = await axios.patch(`http://localhost:3001/users/${userId}`, data)
-  return response.data
-}
+	const response = await axios.patch(
+		`${BASE_URL}/users/${userId}`,
+		data
+	);
+
+	return response.data;
+};

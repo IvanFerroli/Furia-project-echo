@@ -1,9 +1,8 @@
 import axios from "axios";
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5174"; // ajuste conforme necessário
+import { BASE_URL } from '../config';
 
 export async function fetchMessages() {
-	const res = await axios.get(`${API_BASE}/messages`);
+	const res = await axios.get(`${BASE_URL}/messages`);
 	return res.data;
 }
 
@@ -13,7 +12,7 @@ export async function sendMessage(message: {
 	text: string;
 	parent_id?: number;
 }) {
-	const res = await axios.post(`${API_BASE}/messages`, message);
+	const res = await axios.post(`${BASE_URL}/messages`, message);
 	return res.data;
 }
 
@@ -22,7 +21,7 @@ export async function reactToMessage(
 	type: "like" | "dislike",
 	user_id: string
 ) {
-	const res = await axios.patch(`${API_BASE}/messages/${id}/reaction`, {
+	const res = await axios.patch(`${BASE_URL}/messages/${id}/reaction`, {
 		type,
 		user_id,
 	});
